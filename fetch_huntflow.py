@@ -21,6 +21,7 @@ import json
 import os
 import sys
 import time
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -41,7 +42,7 @@ TOKEN = (os.environ.get("HUNTFLOW_TOKEN") or "").strip()
 CACHE_FILE = Path("cache.json")   # кэш логов, чтобы не перекачивать всё каждый час
 OUT_FILE = Path("docs/data.json")
 PAGE_SIZE = 30                    # у эндпоинта кандидатов лимит 30 на страницу
-RPS_DELAY = 0.25                  # пауза между запросами, чтобы не ловить лимиты
+RPS_DELAY = 0.1                   # пауза между запросами, лимиты ХФ позволяют
 
 # ---------------------------------------------------------------------
 # Маппинг этапов на группы воронки.
@@ -68,6 +69,28 @@ GROUP_OVERRIDES = {
     "Исп. срок пройден":     "other",
     "Принятие решения":      "other",
 }
+
+# ---------------------------------------------------------------------
+# Привязка вакансий к рекрутерам. По умолчанию скрипт сам определяет
+# владельца вакансии: кто чаще всех двигал кандидатов на рекрутерских
+# этапах (добавление, скрининг, интервью). Если кого-то определило
+# неправильно, впиши вакансию сюда руками, имя точно как в ХФ:
+VACANCY_RECRUITER_OVERRIDES = {
+    # "Senior Backend (PHP)": "Имя Фамилия",
+}
+
+# ---------------------------------------------------------------------
+# В дашборд попадают только эти рекрутеры. Совпадение по началу любого
+# слова в имени пользователя ХФ, без учета регистра, чтобы не зависеть
+# от точного написания ФИО. Наняли нового рекрутера: допиши сюда.
+RECRUITER_WHITELIST = ["сон", "соф", "семён", "семен", "александ", "саш"]
+
+
+def is_recruiter(name: str) -> bool:
+    for word in (name or "").lower().split():
+        if any(word.startswith(w) for w in RECRUITER_WHITELIST):
+            return True
+    return False
 
 KEYWORDS = [
     ("hired",     ["вышел", "нанят", "оформ", "hired"]),
@@ -97,13 +120,15 @@ def classify(name: str, hf_type: str) -> str:
 SESSION = requests.Session()
 
 
-def api_get(path: str, params: dict | None = None) -> dict:
+def api_get(path: str, params: dict | None = None, allow_missing: bool = False) -> dict:
     for attempt in range(1, 6):
         r = SESSION.get(API + path, params=params, timeout=30)
         if r.status_code == 401:
             sys.exit("Huntflow ответил 401: токен неверный или истек. "
                      "Проверь секрет HUNTFLOW_TOKEN в настройках репозитория.")
         if r.status_code == 404:
+            if allow_missing:
+                return {}
             sys.exit(f"Huntflow ответил 404 на {r.url}\n"
                      f"Тело ответа: {r.text[:300]}\n"
                      "Похоже, у API поменялись пути. Скинь этот лог в чат, поправим.")
@@ -121,10 +146,11 @@ def api_get(path: str, params: dict | None = None) -> dict:
     sys.exit(f"Huntflow стабильно не отвечает по {path}, прерываюсь.")
 
 
-def paged(path: str, params: dict | None = None):
+def paged(path: str, params: dict | None = None, allow_missing: bool = False):
     page = 1
     while True:
-        data = api_get(path, {**(params or {}), "count": PAGE_SIZE, "page": page})
+        data = api_get(path, {**(params or {}), "count": PAGE_SIZE, "page": page},
+                       allow_missing)
         items = data.get("items", [])
         yield from items
         total_pages = data.get("total_pages")
@@ -222,6 +248,30 @@ def main() -> None:
         vacancies[v["id"]] = v.get("position", f"Вакансия {v['id']}")
     print(f"Вакансий: {len(vacancies)}")
 
+    # 3b. Рекрутеры, назначенные на вакансии прямо в ХФ
+    users: dict = {}
+    for cw in paged(f"/accounts/{acc_id}/coworkers", allow_missing=True):
+        name = cw.get("name") or ""
+        if cw.get("id") is not None:
+            users[cw["id"]] = name
+        if cw.get("member") is not None:
+            users.setdefault(cw["member"], name)
+    hf_owner: dict[str, str] = {}
+    for vid, vname in vacancies.items():
+        detail = api_get(f"/accounts/{acc_id}/vacancies/{vid}", allow_missing=True)
+        names = []
+        for c in detail.get("coworkers") or []:
+            if isinstance(c, dict):
+                nm = c.get("name") or users.get(c.get("id")) or users.get(c.get("member"))
+            else:
+                nm = users.get(c)
+            if nm:
+                names.append(nm)
+        wl = [n for n in names if is_recruiter(n)]
+        if wl:
+            hf_owner[vname] = wl[0]
+    print(f"Вакансий с рекрутером, назначенным в ХФ: {len(hf_owner)}")
+
     # 4. Кандидаты и их логи (с кэшем, чтобы час от часа качать только новое)
     cache: dict = {}
     if CACHE_FILE.exists():
@@ -229,9 +279,15 @@ def main() -> None:
             cache = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
         except Exception:
             cache = {}
+    if cache.get("_format") != 2:
+        if cache:
+            print("Формат кэша обновился (добавлены названия этапов), качаю логи заново")
+        cache = {"_format": 2}
+
+    def save_cache() -> None:
+        CACHE_FILE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
 
     events: list[dict] = []
-    new_cache: dict = {}
     total = fetched = 0
 
     for a in paged(f"/accounts/{acc_id}/applicants"):
@@ -246,7 +302,6 @@ def main() -> None:
 
         cached = cache.get(aid)
         if cached and cached.get("key") == key:
-            new_cache[aid] = cached
             events.extend(cached.get("events", []))
             continue
 
@@ -264,11 +319,9 @@ def main() -> None:
             lg_type = lg.get("type")
 
             if lg_type == "ADD":
-                group = "added"
+                st_name, group = "Новые", "added"
             elif lg_type == "STATUS" and lg.get("status") in statuses:
-                group = statuses[lg["status"]][1]
-                if group == "other":
-                    continue
+                st_name, group = statuses[lg["status"]]
             else:
                 continue
 
@@ -281,26 +334,75 @@ def main() -> None:
 
             evs.append({
                 "d": date,
-                "g": group,
+                "st": st_name,
                 "rec": who,
                 "vac": vacancies.get(vac_id, f"Вакансия {vac_id}"),
             })
 
-        new_cache[aid] = {"key": key, "events": evs}
+        cache[aid] = {"key": key, "events": evs}
         events.extend(evs)
         if fetched % 50 == 0:
             print(f"  обработано кандидатов: {total}, докачано логов: {fetched}")
+        if fetched % 200 == 0:
+            save_cache()  # промежуточное сохранение: обрыв не потеряет прогресс
 
     print(f"Кандидатов всего: {total}, свежих (докачаны логи): {fetched}, событий: {len(events)}")
 
-    # 5. Сохранение
-    CACHE_FILE.write_text(json.dumps(new_cache, ensure_ascii=False), encoding="utf-8")
+    # 5. Привязка вакансий к рекрутерам: одна вакансия, один владелец.
+    # Приоритет: ручной словарь > рекрутер, назначенный в ХФ > эвристика
+    # по активности. Кэш хранит сырые данные, привязку можно менять
+    # без перекачивания логов.
+    group_of = {name: group for name, group in statuses.values()}
+    group_of.setdefault("Новые", "added")
+
+    weights: dict[str, Counter] = {}
+    for e in events:
+        if e["rec"] == "Система" or not is_recruiter(e["rec"]):
+            continue
+        if group_of.get(e["st"]) in ("added", "screening", "interview"):
+            weights.setdefault(e["vac"], Counter())[e["rec"]] += 1
+    owner: dict[str, str] = {
+        vac: c.most_common(1)[0][0] for vac, c in weights.items()
+    }
+    owner.update(hf_owner)
+    owner.update(VACANCY_RECRUITER_OVERRIDES)
+    print("Привязка вакансий к рекрутерам:")
+    for vac in sorted(owner):
+        src = ("вручную" if vac in VACANCY_RECRUITER_OVERRIDES
+               else "из ХФ" if vac in hf_owner else "по активности")
+        print(f"  {vac} -> {owner[vac]} ({src})")
+    dropped = sorted({e["vac"] for e in events} - set(owner))
+    if dropped:
+        print("Вакансии без рекрутера из RECRUITER_WHITELIST, в дашборд не попадут:")
+        for vac in dropped:
+            print(f"  - {vac}")
+
+    # 6. Сохранение: компактный формат, события ссылаются на справочники
+    stages_list = [name for name, _g in statuses.values()]
+    if "Новые" not in stages_list:
+        stages_list.insert(0, "Новые")
+    stage_i = {n: i for i, n in enumerate(stages_list)}
+    recs_list = sorted(set(owner.values()))
+    rec_i = {n: i for i, n in enumerate(recs_list)}
+    vacs_list = sorted(owner)
+    vac_i = {n: i for i, n in enumerate(vacs_list)}
+    out_events = [
+        {"d": e["d"], "r": rec_i[owner[e["vac"]]],
+         "v": vac_i[e["vac"]], "s": stage_i[e["st"]]}
+        for e in events if e["vac"] in owner and e["st"] in stage_i
+    ]
+
+    save_cache()
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     OUT_FILE.write_text(json.dumps({
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "account": acc_name,
         "unmapped_statuses": unmapped,
-        "events": events,
+        "stages": stages_list,
+        "stage_groups": group_of,
+        "recruiters": recs_list,
+        "vacancies": vacs_list,
+        "events": out_events,
     }, ensure_ascii=False), encoding="utf-8")
     print(f"Готово: {OUT_FILE}")
 
