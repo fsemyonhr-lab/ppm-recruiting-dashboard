@@ -40,7 +40,7 @@ API = ""  # выбирается автоматически в choose_base()
 TOKEN = (os.environ.get("HUNTFLOW_TOKEN") or "").strip()
 CACHE_FILE = Path("cache.json")   # кэш логов, чтобы не перекачивать всё каждый час
 OUT_FILE = Path("docs/data.json")
-PAGE_SIZE = 50
+PAGE_SIZE = 30                    # у эндпоинта кандидатов лимит 30 на страницу
 RPS_DELAY = 0.25                  # пауза между запросами, чтобы не ловить лимиты
 
 # ---------------------------------------------------------------------
@@ -65,6 +65,8 @@ GROUP_OVERRIDES = {
     "Выставлен оффер":       "offer",
     "Оффер принят":          "hired",
     "Отказ":                 "rejected",
+    "Исп. срок пройден":     "other",
+    "Принятие решения":      "other",
 }
 
 KEYWORDS = [
@@ -105,6 +107,9 @@ def api_get(path: str, params: dict | None = None) -> dict:
             sys.exit(f"Huntflow ответил 404 на {r.url}\n"
                      f"Тело ответа: {r.text[:300]}\n"
                      "Похоже, у API поменялись пути. Скинь этот лог в чат, поправим.")
+        if r.status_code == 400:
+            sys.exit(f"Huntflow ответил 400 на {r.url}\n"
+                     f"Тело ответа: {r.text[:300]}")
         if r.status_code == 429 or r.status_code >= 500:
             wait = 5 * attempt
             print(f"  {r.status_code} по {path}, жду {wait}с и повторяю...")
@@ -201,8 +206,11 @@ def main() -> None:
     for st in paged(f"/accounts/{acc_id}/vacancies/statuses"):
         group = classify(st.get("name", ""), st.get("type", ""))
         statuses[st["id"]] = (st.get("name", ""), group)
-    print(f"Этапов в справочнике: {len(statuses)}")
-    unmapped = sorted({name for name, group in statuses.values() if group == "other"})
+    print(f"Этапов в справочнике: {len(statuses)}, маппинг:")
+    for name, group in sorted(statuses.values(), key=lambda x: (x[1], x[0])):
+        print(f"  [{group:9}] {name}")
+    unmapped = sorted({name for name, group in statuses.values()
+                       if group == "other" and name not in GROUP_OVERRIDES})
     if unmapped:
         print("Этапы без группы (попали в other), при желании добавь их в GROUP_OVERRIDES:")
         for n in unmapped:
