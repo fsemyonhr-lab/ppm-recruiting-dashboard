@@ -14,6 +14,7 @@
 Переменные окружения:
   HUNTFLOW_TOKEN       персональный API-токен (обязательно)
   HUNTFLOW_ACCOUNT_ID  id организации, если их несколько (опционально)
+  HUNTFLOW_API         базовый URL API, если стандартные не подошли (опционально)
 """
 
 import json
@@ -25,8 +26,18 @@ from pathlib import Path
 
 import requests
 
-API = os.environ.get("HUNTFLOW_API", "https://api.huntflow.ru/v2")
-TOKEN = os.environ.get("HUNTFLOW_TOKEN")
+# Кандидаты базового URL API: скрипт проверит их по очереди и возьмет
+# первый рабочий. Если поддержка ХФ дала свой адрес, задай его
+# переменной окружения HUNTFLOW_API в update.yml, он проверится первым.
+API_CANDIDATES = [
+    os.environ.get("HUNTFLOW_API"),
+    "https://api.huntflow.ru/v2",
+    "https://api.huntflow.ru/latest",
+    "https://api.huntflow.ru",
+    "https://api.huntflow.ai/v2",
+]
+API = ""  # выбирается автоматически в choose_base()
+TOKEN = (os.environ.get("HUNTFLOW_TOKEN") or "").strip()
 CACHE_FILE = Path("cache.json")   # кэш логов, чтобы не перекачивать всё каждый час
 OUT_FILE = Path("docs/data.json")
 PAGE_SIZE = 50
@@ -90,6 +101,10 @@ def api_get(path: str, params: dict | None = None) -> dict:
         if r.status_code == 401:
             sys.exit("Huntflow ответил 401: токен неверный или истек. "
                      "Проверь секрет HUNTFLOW_TOKEN в настройках репозитория.")
+        if r.status_code == 404:
+            sys.exit(f"Huntflow ответил 404 на {r.url}\n"
+                     f"Тело ответа: {r.text[:300]}\n"
+                     "Похоже, у API поменялись пути. Скинь этот лог в чат, поправим.")
         if r.status_code == 429 or r.status_code >= 500:
             wait = 5 * attempt
             print(f"  {r.status_code} по {path}, жду {wait}с и повторяю...")
@@ -116,6 +131,40 @@ def paged(path: str, params: dict | None = None):
         page += 1
 
 
+def choose_base() -> None:
+    """Перебирает возможные адреса API и выбирает первый рабочий."""
+    global API
+    report = []
+    for base in [b.rstrip("/") for b in API_CANDIDATES if b]:
+        try:
+            r = SESSION.get(base + "/accounts", timeout=30)
+        except requests.RequestException as exc:
+            report.append((base, f"сетевая ошибка: {exc}"))
+            continue
+        if r.status_code == 200 and '"items"' in r.text:
+            items = r.json().get("items", [])
+            if items:
+                # проверяем, что база понимает пути v2, а не только /accounts
+                probe = SESSION.get(
+                    f"{base}/accounts/{items[0]['id']}/vacancies/statuses",
+                    timeout=30,
+                )
+                if probe.status_code == 404:
+                    report.append((base, "отдает /accounts, но пути v2 не знает"))
+                    continue
+            API = base
+            print(f"Рабочий адрес API: {base}")
+            return
+        report.append((base, f"{r.status_code}: {r.text[:200]}"))
+    print("Ни один адрес API не подошел. Что ответили серверы:")
+    for base, msg in report:
+        print(f"  {base} -> {msg}")
+    print("Подсказка: 401 значит адрес живой, но токен не подошел.")
+    sys.exit("Спроси у Службы заботы ХФ базовый URL API для вашего аккаунта "
+             "и добавь его переменной HUNTFLOW_API в update.yml, "
+             "либо скинь этот лог в чат.")
+
+
 # ----------------------------- сбор ----------------------------------
 
 def main() -> None:
@@ -124,6 +173,10 @@ def main() -> None:
                  "(Settings, Secrets and variables, Actions).")
 
     SESSION.headers["Authorization"] = f"Bearer {TOKEN}"
+    SESSION.headers["User-Agent"] = "PPM-Recruiting-Dashboard/1.0 (github actions)"
+    print(f"Токен на месте, длина {len(TOKEN)} символов")
+
+    choose_base()
 
     # 1. Организация
     accounts = api_get("/accounts").get("items", [])
