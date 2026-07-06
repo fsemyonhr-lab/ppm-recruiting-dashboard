@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPM · Аналитика подбора</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F2F4F9;
+    --card:#FFFFFF;
+    --ink:#10162B;
+    --muted:#5B6478;
+    --line:#E2E6F0;
+    --cobalt:#2742DB;
+    --cobalt-soft:#E8EBFC;
+    --green:#0E9F6E;
+    --green-mid:#7ED0AC;
+    --green-soft:#E2F5EE;
+    --base-bar:#D9E0F0;
+    --danger:#D64545;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Golos Text',system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.45;
+    padding:28px clamp(16px,4vw,48px) 48px;
+  }
+  h1,h2{font-family:'Unbounded',sans-serif;font-weight:600}
+
+  /* ---------- header ---------- */
+  .top{
+    display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;
+    justify-content:space-between;margin-bottom:24px;
+  }
+  .eyebrow{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--cobalt);font-weight:700;margin-bottom:6px;
+  }
+  h1{font-size:clamp(19px,2.6vw,26px);line-height:1.2}
+  .range-note{color:var(--muted);font-size:13px;margin-top:6px}
+  .badge{
+    display:inline-block;padding:1px 9px;border-radius:999px;
+    font-size:11.5px;font-weight:600;vertical-align:1px;margin-left:6px;
+  }
+  .badge.live{background:var(--green-soft);color:var(--green)}
+  .badge.demo{background:#FDECEC;color:var(--danger)}
+
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .seg button{
+    border:0;background:transparent;padding:7px 15px;border-radius:999px;
+    font:inherit;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;
+  }
+  .seg button.active{background:var(--ink);color:#fff}
+  .seg button:focus-visible,input:focus-visible,.rec-row:focus-visible{
+    outline:2px solid var(--cobalt);outline-offset:2px;
+  }
+  input[type=date]{
+    font:inherit;color:var(--ink);background:var(--card);
+    border:1px solid var(--line);border-radius:999px;padding:8px 14px;
+  }
+  .dates{display:none;gap:8px;align-items:center;color:var(--muted)}
+  .dates.show{display:flex}
+  .rec-chips{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 18px}
+  .chip-btn{
+    border:1px solid var(--line);background:var(--bg);border-radius:999px;
+    padding:6px 14px;font:inherit;font-size:13px;font-weight:500;
+    color:var(--muted);cursor:pointer;
+  }
+  .chip-btn:hover{border-color:var(--cobalt);color:var(--cobalt)}
+  .chip-btn.active{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip-btn:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+
+  /* ---------- KPI ---------- */
+  .kpis{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;
+  }
+  .kpi{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px 14px;
+  }
+  .kpi .num{font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(22px,2.4vw,30px);line-height:1.1;font-variant-numeric:tabular-nums}
+  .kpi .lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .kpi.hero{
+    background:var(--cobalt);border-color:var(--cobalt);color:#fff;position:relative;overflow:hidden;
+  }
+  .kpi.hero .lbl{color:rgba(255,255,255,.75)}
+  .kpi.hero::after{
+    content:"";position:absolute;right:-22px;top:-22px;width:82px;height:82px;
+    border-radius:50%;background:rgba(255,255,255,.12);
+  }
+
+  /* ---------- layout ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:16px;margin-bottom:16px}
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;min-width:0;
+  }
+  .panel h2{font-size:14px;margin-bottom:4px}
+  .panel .sub{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+
+  /* ---------- funnel ---------- */
+  .stage{margin-bottom:2px}
+  .stage-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px}
+  .stage-top b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+  .bar{
+    height:42px;border-radius:11px;min-width:64px;
+    background:var(--base-bar);
+    display:flex;align-items:center;padding-left:16px;
+    font-weight:600;font-size:13px;color:var(--ink);
+    transition:width .45s cubic-bezier(.2,.7,.2,1);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .bar.interview{background:var(--cobalt);color:#fff}
+  .bar.offer{background:var(--green-mid);color:var(--ink)}
+  .bar.hired{background:var(--green);color:#fff}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .conv{
+    display:inline-flex;align-items:center;gap:5px;
+    margin:5px 0 7px 6px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;
+  }
+  .conv b{color:var(--ink)}
+  .empty{color:var(--muted);padding:24px 0;text-align:center}
+
+  /* ---------- recruiters ---------- */
+  .rec-row{
+    width:100%;text-align:left;border:0;background:transparent;font:inherit;color:inherit;
+    padding:12px 10px;border-radius:10px;cursor:pointer;display:block;
+  }
+  .rec-row:hover{background:var(--cobalt-soft)}
+  .rec-row.active{background:var(--cobalt-soft);box-shadow:inset 0 0 0 1.5px var(--cobalt)}
+  .rec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .rec-name{font-weight:600}
+  .rec-int{font-family:'Unbounded',sans-serif;font-weight:600;font-size:17px;color:var(--cobalt);font-variant-numeric:tabular-nums}
+  .rec-int small{font-family:'Golos Text',sans-serif;font-weight:500;font-size:11px;color:var(--muted);margin-left:5px}
+  .rec-bar{height:8px;border-radius:99px;background:var(--cobalt-soft);overflow:hidden;margin-bottom:7px}
+  .rec-bar i{display:block;height:100%;background:var(--cobalt);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1)}
+  .rec-meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .rec-meta b{color:var(--ink);font-weight:600}
+
+  /* ---------- vacancies table ---------- */
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+  th{
+    text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  th.r,td.r{text-align:right}
+  td{padding:10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:#F7F9FE}
+  .vac-name{font-weight:600;white-space:normal}
+  .vac-rec{color:var(--muted);font-size:12px}
+  td.int{color:var(--cobalt);font-weight:700}
+  .convcell{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+  .convcell b{min-width:38px;text-align:right}
+  .mini{width:86px;height:7px;border-radius:99px;background:var(--green-soft);overflow:hidden;flex:none}
+  .mini i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .45s ease}
+  .lowconv b{color:var(--danger)}
+  .lowconv .mini i{background:var(--danger)}
+
+  footer{margin-top:20px;font-size:12px;color:var(--muted)}
+  footer .warn{color:var(--danger)}
+
+  @media (max-width:1020px){
+    .grid{grid-template-columns:1fr}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .kpi.hero{grid-column:span 2}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div>
+    <div class="eyebrow">PPM · Плати по миру · подбор</div>
+    <h1>Воронка и эффективность рекрутеров</h1>
+    <div class="range-note" id="rangeNote"></div>
+  </div>
+  <div class="filters">
+    <div class="seg" role="group" aria-label="Период">
+      <button data-preset="week">Неделя</button>
+      <button data-preset="month" class="active">Месяц</button>
+      <button data-preset="custom">Период</button>
+    </div>
+    <div class="dates" id="dates">
+      <input type="date" id="dFrom" aria-label="Дата начала">
+      <span>по</span>
+      <input type="date" id="dTo" aria-label="Дата окончания">
+    </div>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="num" id="kAdded">0</div><div class="lbl">Новые кандидаты</div></div>
+  <div class="kpi hero"><div class="num" id="kInt">0</div><div class="lbl">Интервью проведено</div></div>
+  <div class="kpi"><div class="num" id="kOffer">0</div><div class="lbl">Офферы</div></div>
+  <div class="kpi"><div class="num" id="kHired">0</div><div class="lbl">Наймы</div></div>
+  <div class="kpi"><div class="num" id="kConv">·</div><div class="lbl">Конверсия в найм</div></div>
+</div>
+
+<div class="grid">
+  <section class="panel">
+    <h2>Воронка подбора</h2>
+    <div class="sub">Переходы по этапам за выбранный период. Этапы разных вакансий сведены в группы</div>
+    <div class="rec-chips" id="recChips" role="group" aria-label="Рекрутер"></div>
+    <div id="funnel"></div>
+    <div class="legend">
+      <span><i style="background:var(--base-bar)"></i>Входящий поток</span>
+      <span><i style="background:var(--cobalt)"></i>Интервью</span>
+      <span><i style="background:var(--green-mid)"></i>Оффер</span>
+      <span><i style="background:var(--green)"></i>Найм</span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>По рекрутерам</h2>
+    <div class="sub">Интервью за период. Клик по строке фильтрует весь дашборд</div>
+    <div id="recruiters"></div>
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Конверсия по вакансиям</h2>
+  <div class="sub">Конверсия: наймы / новые кандидаты за период. Сортировка от лучшей</div>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Вакансия</th>
+          <th class="r">Новые</th>
+          <th class="r">Скрининг</th>
+          <th class="r">Интервью</th>
+          <th class="r">Офферы</th>
+          <th class="r">Наймы</th>
+          <th class="r">Конверсия</th>
+        </tr>
+      </thead>
+      <tbody id="vacBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<footer id="foot"></footer>
+
+<script>
+/* =====================================================================
+   Дашборд читает docs/data.json, который раз в час собирает
+   fetch_huntflow.py через GitHub Actions. Если data.json недоступен
+   (например, файл открыт локально до первого запуска), показывает
+   демо-данные с пометкой.
+   ===================================================================== */
+
+const GROUPS = [
+  {id:'added',     label:'Новые кандидаты', type:'base'},
+  {id:'screening', label:'Скрининг',        type:'base'},
+  {id:'interview', label:'Интервью',        type:'interview'},
+  {id:'offer',     label:'Оффер',           type:'offer'},
+  {id:'hired',     label:'Найм',            type:'hired'}
+];
+
+const DAY = 86400000;
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+let EVENTS = [];                                    // {date, g, rec, vac}
+let META = {demo:true, generated:null, unmapped:[]};
+let RECRUITERS = [];
+
+/* ------------------------- демо-режим ------------------------- */
+
+function demoEvents(){
+  const seedRand = (s => () => {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  })(20260706);
+  const ri = (a,b) => a + Math.floor(seedRand()*(b-a+1));
+  const VAC = [
+    {name:'CTO', rec:'Семён', w:14, hard:0.72},
+    {name:'Head of Security', rec:'Семён', w:18, hard:0.8},
+    {name:'Tech Lead PHP/Laravel', rec:'Соня', w:32, hard:0.85},
+    {name:'Senior Backend (PHP)', rec:'Соня', w:58, hard:1},
+    {name:'Frontend Developer', rec:'Саша', w:54, hard:1},
+    {name:'L3 Support', rec:'Саша', w:66, hard:1.06},
+    {name:'Системный аналитик', rec:'Лена', w:48, hard:1},
+    {name:'QA Engineer', rec:'Лена', w:44, hard:1.05},
+    {name:'Продуктовый дизайнер', rec:'София', w:38, hard:0.95},
+    {name:'Продуктовый аналитик', rec:'София', w:42, hard:1}
+  ];
+  const SKILL = {'Соня':1.08,'София':1.02,'Саша':0.94,'Лена':1,'Семён':0.9};
+  const CHAIN = [
+    ['screening',0.62,1,4],['interview',0.55,2,6],['interview',0.58,3,8],
+    ['interview',0.5,3,7],['offer',0.55,2,5],['hired',0.78,5,14]
+  ];
+  const ev = [];
+  for(const v of VAC){
+    for(let i=0;i<v.w;i++){
+      let cur = new Date(+TODAY - ri(0,99)*DAY);
+      ev.push({date:cur, g:'added', rec:v.rec, vac:v.name});
+      for(const [g,p,d1,d2] of CHAIN){
+        if(seedRand() > Math.min(0.95, p*v.hard*SKILL[v.rec])) break;
+        cur = new Date(+cur + ri(d1,d2)*DAY);
+        if(cur > TODAY) break;
+        ev.push({date:cur, g, rec:v.rec, vac:v.name});
+      }
+    }
+  }
+  return ev;
+}
+
+/* ------------------------- загрузка ------------------------- */
+
+async function loadData(){
+  try{
+    const r = await fetch('data.json', {cache:'no-store'});
+    if(!r.ok) throw new Error('нет data.json');
+    const j = await r.json();
+    EVENTS = (j.events || []).map(e => ({
+      date:new Date(e.d + 'T00:00:00'), g:e.g, rec:e.rec, vac:e.vac
+    }));
+    META = {
+      demo:false,
+      generated:j.generated_at ? new Date(j.generated_at) : null,
+      unmapped:j.unmapped_statuses || []
+    };
+  }catch(err){
+    EVENTS = demoEvents();
+    META = {demo:true, generated:null, unmapped:[]};
+  }
+  /* рекрутеры: все, кто делал действия, по убыванию интервью за всё время */
+  const cnt = {};
+  for(const e of EVENTS){
+    if(!cnt[e.rec]) cnt[e.rec] = 0;
+    if(e.g === 'interview') cnt[e.rec]++;
+  }
+  RECRUITERS = Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a] || a.localeCompare(b,'ru'));
+  render();
+}
+
+/* ------------------------- фильтры и подсчет ------------------------- */
+
+const state = {preset:'month', from:null, to:null, rec:'all'};
+
+function applyPreset(){
+  state.to = new Date(TODAY);
+  if(state.preset === 'week')  state.from = new Date(+TODAY - 6*DAY);
+  if(state.preset === 'month') state.from = new Date(+TODAY - 29*DAY);
+  if(state.preset === 'custom'){
+    const f = document.getElementById('dFrom').value;
+    const t = document.getElementById('dTo').value;
+    state.from = f ? new Date(f+'T00:00:00') : new Date(+TODAY - 29*DAY);
+    state.to   = t ? new Date(t+'T00:00:00') : new Date(TODAY);
+    if(state.from > state.to) [state.from, state.to] = [state.to, state.from];
+  }
+}
+
+const inRange = e => e.date >= state.from && e.date <= state.to;
+
+function stats(events){
+  const s = {counts:{}};
+  GROUPS.forEach(g => s.counts[g.id] = 0);
+  for(const e of events){
+    if(s.counts[e.g] !== undefined) s.counts[e.g]++;
+  }
+  return s;
+}
+
+const pct = (a,b) => b > 0 ? Math.round(a/b*100) + '%' : '·';
+const fmt = d => d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+
+/* ------------------------- рендер ------------------------- */
+
+function render(){
+  applyPreset();
+
+  const period = EVENTS.filter(inRange);
+  const pool = period.filter(e => state.rec === 'all' || e.rec === state.rec);
+  const total = stats(pool);
+
+  const recLabel = state.rec === 'all' ? 'все рекрутеры' : state.rec;
+  const badge = META.demo
+    ? '<span class="badge demo">демо-данные</span>'
+    : '<span class="badge live">обновлено ' +
+      META.generated.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) +
+      '</span>';
+  document.getElementById('rangeNote').innerHTML =
+    fmt(state.from) + ' по ' + fmt(state.to) + ' · ' + recLabel + badge;
+
+  /* KPI */
+  document.getElementById('kAdded').textContent = total.counts.added;
+  document.getElementById('kInt').textContent   = total.counts.interview;
+  document.getElementById('kOffer').textContent = total.counts.offer;
+  document.getElementById('kHired').textContent = total.counts.hired;
+  document.getElementById('kConv').textContent  = pct(total.counts.hired, total.counts.added);
+
+  /* выбор рекрутера */
+  document.getElementById('recChips').innerHTML = ['all', ...RECRUITERS].map(r =>
+    '<button class="chip-btn'+(state.rec===r?' active':'')+'" data-rec="'+r+'">'
+    + (r === 'all' ? 'Все' : r) + '</button>'
+  ).join('');
+  document.querySelectorAll('.chip-btn').forEach(el => {
+    el.addEventListener('click', () => { state.rec = el.dataset.rec; render(); });
+  });
+
+  /* воронка */
+  const fEl = document.getElementById('funnel');
+  const maxC = Math.max(1, ...GROUPS.map(g => total.counts[g.id]));
+  if(GROUPS.every(g => total.counts[g.id] === 0)){
+    fEl.innerHTML = '<div class="empty">Нет движения по этапам за выбранный период</div>';
+  } else {
+    let html = '';
+    GROUPS.forEach((g, i) => {
+      const n = total.counts[g.id];
+      const w = Math.max(9, Math.round(n/maxC*100));
+      html += '<div class="stage">'
+            + '<div class="stage-top"><span>'+g.label+'</span><b>'+n+'</b></div>'
+            + '<div class="bar '+g.type+'" style="width:'+w+'%"></div>'
+            + '</div>';
+      if(i < GROUPS.length-1){
+        const next = total.counts[GROUPS[i+1].id];
+        html += '<div class="conv">конверсия <b>'+pct(next,n)+'</b></div>';
+      }
+    });
+    fEl.innerHTML = html;
+  }
+
+  /* рекрутеры */
+  const recData = RECRUITERS.map(r => {
+    const s = stats(period.filter(e => e.rec === r));
+    return {name:r, ...s};
+  }).sort((a,b) => b.counts.interview - a.counts.interview);
+
+  const maxInt = Math.max(1, ...recData.map(r => r.counts.interview));
+  document.getElementById('recruiters').innerHTML = recData.map(r =>
+    '<button class="rec-row'+(state.rec===r.name?' active':'')+'" data-rec="'+r.name+'">'
+    + '<div class="rec-head"><span class="rec-name">'+r.name+'</span>'
+    + '<span class="rec-int">'+r.counts.interview+'<small>интервью</small></span></div>'
+    + '<div class="rec-bar"><i style="width:'+Math.round(r.counts.interview/maxInt*100)+'%"></i></div>'
+    + '<div class="rec-meta">новые <b>'+r.counts.added+'</b> · офферы <b>'+r.counts.offer+'</b>'
+    + ' · наймы <b>'+r.counts.hired+'</b> · конв. <b>'+pct(r.counts.hired,r.counts.added)+'</b></div>'
+    + '</button>'
+  ).join('') || '<div class="empty">Пока нет данных</div>';
+
+  document.querySelectorAll('.rec-row').forEach(el => {
+    el.addEventListener('click', () => {
+      state.rec = state.rec === el.dataset.rec ? 'all' : el.dataset.rec;
+      render();
+    });
+  });
+
+  /* вакансии */
+  const vacMap = {};
+  for(const e of pool){
+    if(!vacMap[e.vac]) vacMap[e.vac] = {events:[], recs:{}};
+    vacMap[e.vac].events.push(e);
+    vacMap[e.vac].recs[e.rec] = (vacMap[e.vac].recs[e.rec] || 0) + 1;
+  }
+  const vacData = Object.entries(vacMap).map(([name, v]) => {
+    const s = stats(v.events);
+    const rec = Object.entries(v.recs).sort((a,b) => b[1]-a[1])[0][0];
+    const conv = s.counts.added > 0 ? s.counts.hired/s.counts.added : -1;
+    return {name, rec, s, conv};
+  }).sort((a,b) => b.conv - a.conv || b.s.counts.hired - a.s.counts.hired
+                 || b.s.counts.added - a.s.counts.added);
+
+  document.getElementById('vacBody').innerHTML = vacData.map(({name, rec, s, conv}) => {
+    const cp = conv >= 0 ? Math.round(conv*100) : null;
+    const low = cp !== null && cp < 5 && s.counts.added >= 5;
+    return '<tr>'
+      + '<td><div class="vac-name">'+name+'</div><div class="vac-rec">'+rec+'</div></td>'
+      + '<td class="r">'+s.counts.added+'</td>'
+      + '<td class="r">'+s.counts.screening+'</td>'
+      + '<td class="r int">'+s.counts.interview+'</td>'
+      + '<td class="r">'+s.counts.offer+'</td>'
+      + '<td class="r">'+s.counts.hired+'</td>'
+      + '<td class="r'+(low?' lowconv':'')+'"><span class="convcell">'
+      + '<span class="mini"><i style="width:'+(cp===null?0:Math.min(100,cp))+'%"></i></span>'
+      + '<b>'+(cp===null?'·':cp+'%')+'</b></span></td>'
+      + '</tr>';
+  }).join('') || '<tr><td colspan="7" class="empty">Нет движения по вакансиям за период</td></tr>';
+
+  /* футер */
+  let foot = META.demo
+    ? 'Демо-данные: data.json еще не собран. Запусти workflow во вкладке Actions.'
+    : 'Данные из Huntflow, обновляются раз в час.';
+  if(META.unmapped.length){
+    foot += ' <span class="warn">Этапы без группы: ' + META.unmapped.join(', ')
+          + '. Добавь их в GROUP_OVERRIDES в fetch_huntflow.py.</span>';
+  }
+  document.getElementById('foot').innerHTML = foot;
+}
+
+/* ------------------------- события ------------------------- */
+
+document.querySelectorAll('.seg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.seg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.preset = btn.dataset.preset;
+    document.getElementById('dates').classList.toggle('show', state.preset === 'custom');
+    render();
+  });
+});
+
+['dFrom','dTo'].forEach(id =>
+  document.getElementById(id).addEventListener('change', render)
+);
+
+const iso = d => d.toISOString().slice(0,10);
+document.getElementById('dFrom').value = iso(new Date(+TODAY - 29*DAY));
+document.getElementById('dTo').value   = iso(TODAY);
+
+loadData();
+</script>
+</body>
+</html>
