@@ -23,21 +23,27 @@ jobs:
           python-version: "3.12"
 
       - name: Установка зависимостей
-        run: pip install requests
+        run: pip install requests cryptography
 
       - name: Сбор данных из Huntflow
+        timeout-minutes: 330   # мягкий стоп до жесткого 6-часового потолка гитхаба
         env:
           HUNTFLOW_TOKEN: ${{ secrets.HUNTFLOW_TOKEN }}
+          HUNTFLOW_REFRESH: ${{ secrets.HUNTFLOW_REFRESH }}
+          HUNTFLOW_KEY: ${{ secrets.HUNTFLOW_KEY }}
+          PYTHONUNBUFFERED: "1"
         run: python fetch_huntflow.py
 
-      - name: Публикация data.json
+      - name: Публикация данных
+        if: always()   # коммитим даже если сбор оборвался, прогресс не теряется
         run: |
           git config user.name "dashboard-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add docs/data.json cache.json
+          git add cache.json token.enc docs/data.json 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "Изменений нет, коммит не нужен"
+            echo "Без изменений"
           else
             git commit -m "data: автообновление"
+            git pull --rebase --autostash origin main || true
             git push
           fi
