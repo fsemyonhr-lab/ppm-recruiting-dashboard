@@ -83,7 +83,8 @@ VACANCY_RECRUITER_OVERRIDES = {
 # В дашборд попадают только эти рекрутеры. Совпадение по началу любого
 # слова в имени пользователя ХФ, без учета регистра, чтобы не зависеть
 # от точного написания ФИО. Наняли нового рекрутера: допиши сюда.
-RECRUITER_WHITELIST = ["сон", "соф", "семён", "семен", "александ", "саш"]
+RECRUITER_WHITELIST = ["сон", "соф", "семён", "семен", "александ", "саш",
+                       "елен", "лен", "сергеев"]
 
 
 def is_recruiter(name: str) -> bool:
@@ -242,11 +243,22 @@ def main() -> None:
         for n in unmapped:
             print(f"  - {n}")
 
-    # 3. Вакансии
+    # 3. Вакансии. Заодно запоминаем, открыта вакансия или нет:
+    # в дашборде будет переключатель "только открытые / все", как в ХФ.
     vacancies: dict[int, str] = {}
+    vac_open: dict[str, bool] = {}
+    states: Counter = Counter()
     for v in paged(f"/accounts/{acc_id}/vacancies"):
-        vacancies[v["id"]] = v.get("position", f"Вакансия {v['id']}")
-    print(f"Вакансий: {len(vacancies)}")
+        name = v.get("position", f"Вакансия {v['id']}")
+        vacancies[v["id"]] = name
+        state = str(v.get("state") or "OPEN").upper()
+        states[state] += 1
+        # вакансия считается открытой, если она не закрыта и не удалена;
+        # HOLD (на паузе) в ХФ тоже не попадает в фильтр "Открытые"
+        is_open = state == "OPEN" and not v.get("closed")
+        vac_open[name] = vac_open.get(name, False) or is_open
+    print(f"Вакансий: {len(vacancies)}, из них открытых: {sum(vac_open.values())}")
+    print("  статусы вакансий: " + ", ".join(f"{k}={n}" for k, n in states.items()))
 
     # 3b. Рекрутеры, назначенные на вакансии прямо в ХФ
     users: dict = {}
@@ -287,7 +299,10 @@ def main() -> None:
     def save_cache() -> None:
         CACHE_FILE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
 
-    events: list[dict] = []
+    # события храним парами (id кандидата, событие): id нужен, чтобы
+    # считать уникальных кандидатов на этапе, а не количество переходов,
+    # именно так считает Центр аналитики ХФ
+    events: list[tuple[str, dict]] = []
     total = fetched = 0
 
     for a in paged(f"/accounts/{acc_id}/applicants"):
@@ -302,7 +317,7 @@ def main() -> None:
 
         cached = cache.get(aid)
         if cached and cached.get("key") == key:
-            events.extend(cached.get("events", []))
+            events.extend((aid, ev) for ev in cached.get("events", []))
             continue
 
         fetched += 1
@@ -340,7 +355,7 @@ def main() -> None:
             })
 
         cache[aid] = {"key": key, "events": evs}
-        events.extend(evs)
+        events.extend((aid, ev) for ev in evs)
         if fetched % 50 == 0:
             print(f"  обработано кандидатов: {total}, докачано логов: {fetched}")
         if fetched % 200 == 0:
@@ -356,7 +371,7 @@ def main() -> None:
     group_of.setdefault("Новые", "added")
 
     weights: dict[str, Counter] = {}
-    for e in events:
+    for _aid, e in events:
         if e["rec"] == "Система" or not is_recruiter(e["rec"]):
             continue
         if group_of.get(e["st"]) in ("added", "screening", "interview"):
@@ -371,7 +386,7 @@ def main() -> None:
         src = ("вручную" if vac in VACANCY_RECRUITER_OVERRIDES
                else "из ХФ" if vac in hf_owner else "по активности")
         print(f"  {vac} -> {owner[vac]} ({src})")
-    dropped = sorted({e["vac"] for e in events} - set(owner))
+    dropped = sorted({e["vac"] for _aid, e in events} - set(owner))
     if dropped:
         print("Вакансии без рекрутера из RECRUITER_WHITELIST, в дашборд не попадут:")
         for vac in dropped:
@@ -386,11 +401,23 @@ def main() -> None:
     rec_i = {n: i for i, n in enumerate(recs_list)}
     vacs_list = sorted(owner)
     vac_i = {n: i for i, n in enumerate(vacs_list)}
-    out_events = [
-        {"d": e["d"], "r": rec_i[owner[e["vac"]]],
-         "v": vac_i[e["vac"]], "s": stage_i[e["st"]]}
-        for e in events if e["vac"] in owner and e["st"] in stage_i
-    ]
+    # id кандидатов переиндексируем в короткие номера, чтобы data.json
+    # не распухал: в дашборде они нужны только для подсчета уникальных
+    app_i: dict[str, int] = {}
+    out_events = []
+    for aid, e in events:
+        if e["vac"] not in owner or e["st"] not in stage_i:
+            continue
+        if aid not in app_i:
+            app_i[aid] = len(app_i)
+        out_events.append({
+            "d": e["d"], "a": app_i[aid], "r": rec_i[owner[e["vac"]]],
+            "v": vac_i[e["vac"]], "s": stage_i[e["st"]],
+        })
+    print(f"В дашборд попадает: вакансий {len(vacs_list)} "
+          f"(открытых {sum(vac_open.get(v, False) for v in vacs_list)}), "
+          f"рекрутеров {len(recs_list)}, кандидатов {len(app_i)}, "
+          f"событий {len(out_events)}")
 
     save_cache()
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -402,6 +429,7 @@ def main() -> None:
         "stage_groups": group_of,
         "recruiters": recs_list,
         "vacancies": vacs_list,
+        "vacancies_open": [bool(vac_open.get(v, False)) for v in vacs_list],
         "events": out_events,
     }, ensure_ascii=False), encoding="utf-8")
     print(f"Готово: {OUT_FILE}")
