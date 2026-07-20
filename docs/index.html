@@ -16,185 +16,154 @@
     --line:#E2E6F0;
     --cobalt:#2742DB;
     --cobalt-soft:#E8EBFC;
-    /* монохромная шкала воронки: чем ближе к найму, тем насыщеннее */
     --f1:#E4E9FB; --f2:#C3CDF7; --f3:#8FA0F0; --f4:#5064E6; --f5:#2742DB;
+    --grey:#DDE1EC;
     --radius:14px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{
-    background:var(--bg);
-    color:var(--ink);
+    background:var(--bg);color:var(--ink);
     font-family:'Golos Text',system-ui,sans-serif;
-    font-size:15px;
-    line-height:1.45;
-    padding:28px clamp(16px,4vw,48px) 48px;
+    font-size:15px;line-height:1.45;
+    padding:28px clamp(14px,4vw,48px) 48px;
   }
   h1,h2{font-family:'Unbounded',sans-serif;font-weight:600}
+  .num{font-family:'Unbounded',sans-serif;font-variant-numeric:tabular-nums}
 
   /* ---------- header ---------- */
-  .top{
-    display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;
-    justify-content:space-between;margin-bottom:24px;
-  }
-  .eyebrow{
-    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--cobalt);font-weight:700;margin-bottom:6px;
-  }
+  .top{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;
+       justify-content:space-between;margin-bottom:22px}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--cobalt);font-weight:700;margin-bottom:6px}
   h1{font-size:clamp(19px,2.6vw,26px);line-height:1.2}
   .range-note{color:var(--muted);font-size:13px;margin-top:6px}
-  .badge{
-    display:inline-block;padding:1px 9px;border-radius:999px;
-    font-size:11.5px;font-weight:600;vertical-align:1px;margin-left:6px;
-  }
+  .badge{display:inline-block;padding:1px 9px;border-radius:999px;
+         font-size:11.5px;font-weight:600;vertical-align:1px;margin-left:6px}
   .badge.live{background:var(--cobalt-soft);color:var(--cobalt)}
   .badge.demo{background:#FDECEC;color:#D64545}
 
   .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
-  .seg button{
-    border:0;background:transparent;padding:7px 15px;border-radius:999px;
-    font:inherit;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;
-  }
+  .seg{display:flex;background:var(--card);border:1px solid var(--line);
+       border-radius:999px;padding:3px}
+  .seg button{border:0;background:transparent;padding:7px 14px;border-radius:999px;
+              font:inherit;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap}
   .seg button.active{background:var(--ink);color:#fff}
   .seg button:focus-visible,input:focus-visible,.chip-btn:focus-visible,
-  .rec-row:focus-visible,summary:focus-visible{
-    outline:2px solid var(--cobalt);outline-offset:2px;
-  }
-  input[type=date]{
-    font:inherit;color:var(--ink);background:var(--card);
-    border:1px solid var(--line);border-radius:999px;padding:8px 14px;
-  }
+  .rcard:focus-visible,summary:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px}
+  input[type=date]{font:inherit;color:var(--ink);background:var(--card);
+                   border:1px solid var(--line);border-radius:999px;padding:8px 13px}
   .dates{display:none;gap:8px;align-items:center;color:var(--muted)}
   .dates.show{display:flex}
-  .rec-chips{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 18px}
-  .chip-btn{
-    border:1px solid var(--line);background:var(--bg);border-radius:999px;
-    padding:6px 14px;font:inherit;font-size:13px;font-weight:500;
-    color:var(--muted);cursor:pointer;
-  }
-  .chip-btn:hover{border-color:var(--cobalt);color:var(--cobalt)}
-  .chip-btn.active{background:var(--ink);border-color:var(--ink);color:#fff}
 
   /* ---------- KPI ---------- */
   .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
-  .kpi{
-    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:16px 18px 13px;
-  }
-  .kpi .num{
-    font-family:'Unbounded',sans-serif;font-weight:700;
-    font-size:clamp(22px,2.4vw,30px);line-height:1.1;font-variant-numeric:tabular-nums;
-  }
-  .kpi .num.accent{color:var(--cobalt)}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+       padding:15px 17px 12px}
+  .kpi .v{font-weight:700;font-size:clamp(21px,2.3vw,29px);line-height:1.1}
+  .kpi .v.accent{color:var(--cobalt)}
   .kpi .lbl{font-size:12.5px;color:var(--muted);margin-top:4px}
-  .kpi .delta{font-size:11.5px;color:var(--muted);margin-top:3px;min-height:15px;font-variant-numeric:tabular-nums}
+  .kpi .delta{font-size:11.5px;color:var(--muted);margin-top:3px;min-height:15px;
+              font-variant-numeric:tabular-nums}
 
   /* ---------- panels ---------- */
-  .panel{
-    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:20px 22px;min-width:0;margin-bottom:16px;
-  }
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+         padding:20px 22px;min-width:0;margin-bottom:16px}
   .panel h2{font-size:14px;margin-bottom:4px}
   .panel .sub{font-size:12.5px;color:var(--muted);margin-bottom:16px}
-  .panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
-  .grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:16px}
+  .panel-head{display:flex;justify-content:space-between;align-items:baseline;
+              gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .panel-head .sub{margin-bottom:0}
+  .grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px;margin-bottom:16px}
   .grid .panel{margin-bottom:0}
-  .grid{margin-bottom:16px}
 
-  /* ---------- chart ---------- */
-  .chart-legend{display:flex;gap:16px;font-size:12px;color:var(--muted)}
-  .chart-legend span{display:inline-flex;align-items:center;gap:6px}
-  .chart-legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
-  #chart svg{display:block;width:100%;height:auto}
-  #chart text{font-family:'Golos Text',sans-serif}
+  /* ---------- recruiter cards ---------- */
+  .rcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:12px}
+  .rcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+         padding:16px 17px 12px;text-align:left;font:inherit;color:inherit;cursor:pointer;
+         display:block;width:100%;transition:border-color .15s ease}
+  .rcard:hover{border-color:var(--cobalt)}
+  .rcard.active{border-color:var(--cobalt);box-shadow:inset 0 0 0 1px var(--cobalt)}
+  .rcard .name{font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;
+               align-items:baseline;gap:8px}
+  .rcard .name small{font-weight:500;font-size:11.5px;color:var(--muted)}
+  .three{display:flex;gap:14px;margin-bottom:10px}
+  .three div{flex:1}
+  .three .n{font-weight:700;font-size:20px;line-height:1.05}
+  .three .n.big{font-size:26px;color:var(--cobalt)}
+  .three .c{font-size:10.5px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase;margin-top:2px}
+  .spark{height:34px;margin:2px 0 8px}
+  .spark svg{display:block;width:100%;height:34px}
+  .rfoot{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;
+         border-top:1px solid var(--line);padding-top:8px}
+  .rfoot b{color:var(--ink);font-weight:600}
+
+  /* ---------- charts ---------- */
+  .chart svg{display:block;width:100%;height:auto}
+  .chart text{font-family:'Golos Text',sans-serif}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
 
   /* ---------- funnel ---------- */
-  .stage{margin-bottom:3px}
-  .stage-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:4px}
-  .stage-top b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
-  .bar{
-    height:24px;border-radius:7px;min-width:34px;
-    transition:width .45s cubic-bezier(.2,.7,.2,1);
-  }
-  .conv{
-    margin:4px 0 8px 2px;font-size:11.5px;color:var(--muted);
-    font-variant-numeric:tabular-nums;
-  }
-  .conv b{color:var(--ink);font-weight:600}
-  .empty{color:var(--muted);padding:24px 0;text-align:center}
+  .stage{margin-bottom:7px}
+  .stage-top{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;
+             color:var(--muted);margin-bottom:3px}
+  .stage-top span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .stage-top b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;flex:none}
+  .bar{height:20px;border-radius:6px;transition:width .4s cubic-bezier(.2,.7,.2,1)}
+  .bar.zero{background:var(--grey);width:2px!important;border-radius:2px}
+  .empty{color:var(--muted);padding:22px 0;text-align:center}
 
-  /* ---------- recruiters ---------- */
-  .rec-row{
-    width:100%;text-align:left;border:0;background:transparent;font:inherit;color:inherit;
-    padding:12px 10px;border-radius:10px;cursor:pointer;display:block;
-  }
-  .rec-row:hover{background:var(--cobalt-soft)}
-  .rec-row.active{background:var(--cobalt-soft);box-shadow:inset 0 0 0 1.5px var(--cobalt)}
-  .rec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-  .rec-name{font-weight:600}
-  .rec-int{font-family:'Unbounded',sans-serif;font-weight:600;font-size:17px;color:var(--cobalt);font-variant-numeric:tabular-nums}
-  .rec-int small{font-family:'Golos Text',sans-serif;font-weight:500;font-size:11px;color:var(--muted);margin-left:5px}
-  .rec-bar{height:6px;border-radius:99px;background:var(--cobalt-soft);overflow:hidden;margin-bottom:7px}
-  .rec-bar i{display:block;height:100%;background:var(--cobalt);border-radius:99px;transition:width .45s cubic-bezier(.2,.7,.2,1)}
-  .rec-meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .rec-meta b{color:var(--ink);font-weight:600}
-
-  /* ---------- vacancies accordion ---------- */
+  /* ---------- vacancies ---------- */
   details.vac{border-bottom:1px solid var(--line)}
   details.vac:last-of-type{border-bottom:0}
-  details.vac summary{
-    list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;
-    padding:13px 4px;
-  }
+  details.vac summary{list-style:none;cursor:pointer;display:flex;align-items:center;
+                      gap:12px;padding:12px 4px}
   details.vac summary::-webkit-details-marker{display:none}
   details.vac summary:hover{background:#F7F9FE}
-  .vac-chev{
-    flex:none;width:18px;height:18px;color:var(--muted);
-    transition:transform .2s ease;
-  }
-  details.vac[open] .vac-chev{transform:rotate(90deg)}
-  .vac-title{flex:1;min-width:0}
-  .vac-name{font-weight:600}
-  .vac-rec{color:var(--muted);font-size:12px}
-  .vac-stats{
-    display:flex;align-items:center;gap:18px;font-size:13px;color:var(--muted);
-    font-variant-numeric:tabular-nums;white-space:nowrap;
-  }
-  .vac-stats b{color:var(--ink);font-weight:600}
-  .vac-stats .int b{color:var(--cobalt)}
-  .vac-conv{display:flex;align-items:center;gap:8px}
-  .mini{width:70px;height:5px;border-radius:99px;background:var(--cobalt-soft);overflow:hidden;flex:none}
+  .chev{flex:none;width:16px;height:16px;color:var(--muted);transition:transform .2s ease}
+  details.vac[open] .chev{transform:rotate(90deg)}
+  .vtitle{flex:1;min-width:0}
+  .vname{font-weight:600}
+  .vrec{color:var(--muted);font-size:12px}
+  .vstats{display:flex;align-items:center;gap:16px;font-size:13px;color:var(--muted);
+          font-variant-numeric:tabular-nums;white-space:nowrap}
+  .vstats b{color:var(--ink);font-weight:600}
+  .vstats .int b{color:var(--cobalt)}
+  .mini{width:64px;height:5px;border-radius:99px;background:var(--cobalt-soft);
+        overflow:hidden;flex:none}
   .mini i{display:block;height:100%;background:var(--cobalt);border-radius:99px}
-  .vac-body{padding:2px 4px 16px 36px}
-  .vac-body .stage-top{font-size:12px}
-  .vac-body .bar{height:16px;border-radius:5px;min-width:24px}
-  .vac-body .conv{display:none}
+  .vbody{padding:2px 4px 14px 32px}
+  .vbody .bar{height:14px;border-radius:4px}
+  .vbody .stage{margin-bottom:5px}
 
-  footer{margin-top:20px;font-size:12px;color:var(--muted)}
+  footer{margin-top:18px;font-size:12px;color:var(--muted)}
   footer .warn{color:#D64545}
 
   @media (max-width:1020px){
     .grid{grid-template-columns:1fr}
     .kpis{grid-template-columns:repeat(2,1fr)}
     .kpis .kpi:first-child{grid-column:span 2}
-    .vac-stats{gap:12px}
-    .vac-stats .hide-m{display:none}
+    .vstats{gap:10px}
+    .vstats .hide-m{display:none}
   }
-  @media (prefers-reduced-motion:reduce){
-    *{transition:none!important}
-  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
 <div class="top">
   <div>
-    <div class="eyebrow">PPM · Плати по миру · подбор</div>
-    <h1>Воронка и эффективность рекрутеров</h1>
+    <div class="eyebrow">PPM · Глобал Пэй · подбор</div>
+    <h1>Эффективность рекрутеров</h1>
     <div class="range-note" id="rangeNote"></div>
   </div>
   <div class="filters">
+    <div class="seg" role="group" aria-label="Вакансии">
+      <button data-open="1" class="active">Открытые</button>
+      <button data-open="0">Все вакансии</button>
+    </div>
     <div class="seg" role="group" aria-label="Период">
       <button data-preset="week">Неделя</button>
       <button data-preset="month" class="active">Месяц</button>
@@ -210,46 +179,51 @@
 </div>
 
 <div class="kpis">
-  <div class="kpi"><div class="num" id="kAdded">0</div><div class="lbl">Новые кандидаты</div><div class="delta" id="dAdded"></div></div>
-  <div class="kpi"><div class="num accent" id="kInt">0</div><div class="lbl">Интервью проведено</div><div class="delta" id="dInt"></div></div>
-  <div class="kpi"><div class="num" id="kOffer">0</div><div class="lbl">Офферы</div><div class="delta" id="dOffer"></div></div>
-  <div class="kpi"><div class="num" id="kHired">0</div><div class="lbl">Наймы</div><div class="delta" id="dHired"></div></div>
-  <div class="kpi"><div class="num" id="kConv">·</div><div class="lbl">Конверсия в найм</div><div class="delta" id="dConv"></div></div>
+  <div class="kpi"><div class="num v" id="kAll">0</div><div class="lbl">Все кандидаты</div><div class="delta" id="dAll"></div></div>
+  <div class="kpi"><div class="num v accent" id="kInt">0</div><div class="lbl">Интервью</div><div class="delta" id="dInt"></div></div>
+  <div class="kpi"><div class="num v" id="kOffer">0</div><div class="lbl">Офферы</div><div class="delta" id="dOffer"></div></div>
+  <div class="kpi"><div class="num v" id="kHired">0</div><div class="lbl">Наймы</div><div class="delta" id="dHired"></div></div>
+  <div class="kpi"><div class="num v" id="kRej">0</div><div class="lbl">Отказы</div><div class="delta" id="dRej"></div></div>
 </div>
 
 <section class="panel">
   <div class="panel-head">
     <div>
-      <h2>Динамика</h2>
-      <div class="sub" id="chartSub">Интервью и наймы за период</div>
-    </div>
-    <div class="chart-legend">
-      <span><i style="background:var(--cobalt)"></i>Интервью</span>
-      <span><i style="background:#8FA0F0"></i>Офферы</span>
-      <span><i style="background:var(--ink)"></i>Наймы</span>
+      <h2>Рекрутеры</h2>
+      <div class="sub">Интервью за сегодня, 7 и 30 дней. Клик по карточке фильтрует дашборд</div>
     </div>
   </div>
-  <div id="chart"></div>
+  <div class="rcards" id="rcards"></div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Накопительные интервью</h2>
+      <div class="sub" id="raceSub">Нарастающим итогом за выбранный период</div>
+    </div>
+    <div class="legend" id="raceLegend"></div>
+  </div>
+  <div class="chart" id="race"></div>
 </section>
 
 <div class="grid">
   <section class="panel">
-    <h2>Воронка подбора</h2>
-    <div class="sub">Переходы по этапам за выбранный период. Этапы разных вакансий сведены в группы</div>
-    <div class="rec-chips" id="recChips" role="group" aria-label="Рекрутер"></div>
+    <h2>Воронка по этапам</h2>
+    <div class="sub">Уникальные кандидаты, попавшие на этап за период. Как в Центре аналитики ХФ</div>
     <div id="funnel"></div>
   </section>
 
   <section class="panel">
-    <h2>По рекрутерам</h2>
-    <div class="sub">Интервью за период. Клик по строке фильтрует весь дашборд</div>
-    <div id="recruiters"></div>
+    <h2>Отказы после этапов</h2>
+    <div class="sub">Кандидаты, ушедшие в отказ, по последнему пройденному этапу</div>
+    <div id="rejects"></div>
   </section>
 </div>
 
 <section class="panel">
   <h2>Конверсия по вакансиям</h2>
-  <div class="sub">Конверсия: наймы / новые кандидаты за период. Клик по вакансии раскрывает ее воронку</div>
+  <div class="sub">Конверсия: наймы / новые кандидаты за период. Клик раскрывает этапы вакансии</div>
   <div id="vacList"></div>
 </section>
 
@@ -257,124 +231,108 @@
 
 <script>
 /* =====================================================================
-   Дашборд читает docs/data.json, который раз в час собирает
-   fetch_huntflow.py через GitHub Actions. Если data.json недоступен
-   (например, файл открыт локально до первого запуска), показывает
-   демо-данные с пометкой.
+   Читает docs/data.json (собирается fetch_huntflow.py раз в час).
+   Математика повторяет Центр аналитики ХФ:
+   - на этапе считаются УНИКАЛЬНЫЕ кандидаты, а не количество переходов
+   - единица учета: пара кандидат + вакансия
+   - по умолчанию только открытые вакансии, как фильтр ХФ
    ===================================================================== */
-
-const GROUPS = [
-  {id:'added',     label:'Новые кандидаты', shade:'var(--f1)', text:'var(--ink)'},
-  {id:'screening', label:'Скрининг',        shade:'var(--f2)', text:'var(--ink)'},
-  {id:'interview', label:'Интервью',        shade:'var(--f3)', text:'var(--ink)'},
-  {id:'offer',     label:'Оффер',           shade:'var(--f4)', text:'#fff'},
-  {id:'hired',     label:'Найм',            shade:'var(--f5)', text:'#fff'}
-];
 
 const DAY = 86400000;
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 
-let EVENTS = [];                                    // {date, g, rec, vac}
+let STAGES = [], SGROUP = [], RECS = [], VACS = [], VOPEN = [], EVENTS = [];
 let META = {demo:true, generated:null, unmapped:[]};
-let RECRUITERS = [];
 
-/* ------------------------- демо-режим ------------------------- */
+const LINE_COLORS = ['#2742DB','#10162B','#7A88C9','#4C5A9E','#A9B3D9','#5F6B99'];
+const SHADE = {added:'var(--f1)', screening:'var(--f2)', interview:'var(--f3)',
+               offer:'var(--f4)', hired:'var(--f5)', other:'#EDF0F8', rejected:'var(--grey)'};
 
-const DEMO_STAGES = ['Новые','Оценка рекрутером','Интервью с рекрутером','Техническое интервью',
-  'Тестовое задание','Финальное интервью','Выставлен оффер','Оффер принят','Отказ'];
-const DEMO_GROUPS = {'Новые':'added','Оценка рекрутером':'screening','Интервью с рекрутером':'interview',
-  'Техническое интервью':'interview','Тестовое задание':'other','Финальное интервью':'interview',
-  'Выставлен оффер':'offer','Оффер принят':'hired','Отказ':'rejected'};
+/* ------------------------- демо ------------------------- */
 
-function demoEvents(){
-  const seedRand = (s => () => {
-    s |= 0; s = s + 0x6D2B79F5 | 0;
+function demoData(){
+  let s = 20260720;
+  const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0;
     let t = Math.imul(s ^ s >>> 15, 1 | s);
     t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-  })(20260706);
-  const ri = (a,b) => a + Math.floor(seedRand()*(b-a+1));
-  const VAC = [
-    {name:'CTO', rec:'Семён', w:14, hard:0.72},
-    {name:'Head of Security', rec:'Семён', w:18, hard:0.8},
-    {name:'Tech Lead PHP/Laravel', rec:'Соня', w:32, hard:0.85},
-    {name:'Senior Backend (PHP)', rec:'Соня', w:58, hard:1},
-    {name:'Frontend Developer', rec:'Саша', w:54, hard:1},
-    {name:'L3 Support', rec:'Саша', w:66, hard:1.06},
-    {name:'Системный аналитик', rec:'Лена', w:48, hard:1},
-    {name:'QA Engineer', rec:'Лена', w:44, hard:1.05},
-    {name:'Продуктовый дизайнер', rec:'София', w:38, hard:0.95},
-    {name:'Продуктовый аналитик', rec:'София', w:42, hard:1}
+    return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const ri = (a,b) => a + Math.floor(rnd()*(b-a+1));
+
+  STAGES = ['Новые','Отправлено сообщение','Оценка рекрутером','Интервью с рекрутером',
+    'Техническое интервью','Тестовое задание','Оценка заказчиком','Platform Test',
+    'System Design','Интервью с заказчиком','Финальное интервью','Проверка СБ',
+    'Выставлен оффер','Оффер принят','Отказ'];
+  SGROUP = ['added','screening','screening','interview','interview','other','other',
+    'interview','interview','interview','interview','other','offer','hired','rejected'];
+  RECS = ['Сергеева Елена','Соня Ч','София М','Александра П','Семён'];
+  const VD = [
+    ['Senior Backend (PHP)',0,58,1,true],['Tech Lead PHP/Laravel',0,32,.85,true],
+    ['Frontend Developer',1,54,1,true],['L3 Support',1,66,1.06,true],
+    ['Системный аналитик',2,48,1,true],['QA Engineer',2,44,1.05,false],
+    ['Продуктовый дизайнер',3,38,.95,true],['Продуктовый аналитик',3,42,1,false],
+    ['CTO',4,14,.72,true],['Head of Security',4,18,.8,true]
   ];
-  const SKILL = {'Соня':1.08,'София':1.02,'Саша':0.94,'Лена':1,'Семён':0.9};
+  VACS = VD.map(v => v[0]); VOPEN = VD.map(v => v[4]);
+  /* opt=true: побочный этап, если не выпал, воронка не обрывается */
   const CHAIN = [
-    ['Оценка рекрутером','screening',0.62,1,4],
-    ['Интервью с рекрутером','interview',0.55,2,6],
-    ['Техническое интервью','interview',0.58,3,8],
-    ['Финальное интервью','interview',0.5,3,7],
-    ['Выставлен оффер','offer',0.55,2,5],
-    ['Оффер принят','hired',0.78,5,14]
+    [1,.92,0,2,false],[2,.55,1,3,false],[3,.6,2,6,false],[5,.25,1,4,true],
+    [4,.65,3,8,false],[7,.3,2,5,true],[8,.25,2,5,true],[9,.35,2,6,true],
+    [10,.7,3,7,false],[11,.4,1,4,true],[12,.75,2,5,false],[13,.8,5,14,false]
   ];
-  const ev = [];
-  for(const v of VAC){
-    for(let i=0;i<v.w;i++){
-      let cur = new Date(+TODAY - ri(0,99)*DAY);
-      ev.push({date:cur, st:'Новые', g:'added', rec:v.rec, vac:v.name});
-      for(const [st,g,p,d1,d2] of CHAIN){
-        if(seedRand() > Math.min(0.95, p*v.hard*SKILL[v.rec])) break;
+  EVENTS = []; let aid = 0;
+  for(let vi=0; vi<VD.length; vi++){
+    const [,ri_, w, hard] = VD[vi];
+    for(let i=0;i<w;i++){
+      const a = aid++;
+      let cur = new Date(+TODAY - ri(0,120)*DAY);
+      EVENTS.push({t:+cur, a, r:ri_, v:vi, s:0});
+      let alive = true;
+      for(const [si,p,d1,d2,opt] of CHAIN){
+        if(!alive) break;
+        if(rnd() > Math.min(.96, p*hard)){
+          if(opt) continue;                       // побочный этап просто пропущен
+          if(rnd() < .6){                          // остальные уходят в отказ
+            cur = new Date(+cur + ri(1,5)*DAY);
+            if(cur <= TODAY) EVENTS.push({t:+cur, a, r:ri_, v:vi, s:14});
+          }
+          alive = false; break;
+        }
         cur = new Date(+cur + ri(d1,d2)*DAY);
-        if(cur > TODAY) break;
-        ev.push({date:cur, st, g, rec:v.rec, vac:v.name});
+        if(cur > TODAY){ alive = false; break; }
+        EVENTS.push({t:+cur, a, r:ri_, v:vi, s:si});
       }
     }
   }
-  return ev;
+  META = {demo:true, generated:null, unmapped:[]};
 }
 
 /* ------------------------- загрузка ------------------------- */
 
-async function loadData(){
+async function load(){
   try{
     const r = await fetch('data.json', {cache:'no-store'});
-    if(!r.ok) throw new Error('нет data.json');
+    if(!r.ok) throw 0;
     const j = await r.json();
-    const gen = j.generated_at ? new Date(j.generated_at) : null;
-    if(j.stages){
-      /* новый формат: события ссылаются на справочники */
-      EVENTS = (j.events || []).map(e => {
-        const st = j.stages[e.s];
-        return {
-          date:new Date(e.d + 'T00:00:00'), st,
-          g:(j.stage_groups || {})[st] || 'other',
-          rec:j.recruiters[e.r], vac:j.vacancies[e.v]
-        };
-      });
-      META = {demo:false, generated:gen, unmapped:j.unmapped_statuses || [],
-              stages:j.stages, stageGroups:j.stage_groups || {}};
-    } else {
-      /* старый формат, на случай если data.json еще не пересобран */
-      EVENTS = (j.events || []).map(e => ({
-        date:new Date(e.d + 'T00:00:00'), g:e.g, rec:e.rec, vac:e.vac, st:null
-      }));
-      META = {demo:false, generated:gen, unmapped:j.unmapped_statuses || [],
-              stages:null, stageGroups:null};
-    }
+    if(!j.stages) throw 0;
+    STAGES = j.stages;
+    SGROUP = STAGES.map(n => (j.stage_groups || {})[n] || 'other');
+    RECS = j.recruiters || [];
+    VACS = j.vacancies || [];
+    VOPEN = j.vacancies_open || VACS.map(() => true);
+    EVENTS = (j.events || []).map(e => ({
+      t:+new Date(e.d + 'T00:00:00'), a:e.a, r:e.r, v:e.v, s:e.s
+    }));
+    META = {demo:false, generated:j.generated_at ? new Date(j.generated_at) : null,
+            unmapped:j.unmapped_statuses || []};
   }catch(err){
-    EVENTS = demoEvents();
-    META = {demo:true, generated:null, unmapped:[], stages:DEMO_STAGES, stageGroups:DEMO_GROUPS};
+    demoData();
   }
-  const cnt = {};
-  for(const e of EVENTS){
-    if(!cnt[e.rec]) cnt[e.rec] = 0;
-    if(e.g === 'interview') cnt[e.rec]++;
-  }
-  RECRUITERS = Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a] || a.localeCompare(b,'ru'));
   render();
 }
 
-/* ------------------------- фильтры и подсчет ------------------------- */
+/* ------------------------- состояние ------------------------- */
 
-const state = {preset:'month', from:null, to:null, rec:'all', openVacs:new Set()};
+const state = {preset:'month', from:null, to:null, rec:null, onlyOpen:true, open:new Set()};
 
 function applyPreset(){
   state.to = new Date(TODAY);
@@ -382,300 +340,320 @@ function applyPreset(){
   if(state.preset === 'month') state.from = new Date(+TODAY - 29*DAY);
   if(state.preset === 'all'){
     let min = Infinity;
-    for(const e of EVENTS) if(+e.date < min) min = +e.date;
+    for(const e of EVENTS) if(e.t < min) min = e.t;
     state.from = new Date(isFinite(min) ? min : +TODAY - 29*DAY);
   }
   if(state.preset === 'custom'){
-    const f = document.getElementById('dFrom').value;
-    const t = document.getElementById('dTo').value;
+    const f = document.getElementById('dFrom').value, t = document.getElementById('dTo').value;
     state.from = f ? new Date(f+'T00:00:00') : new Date(+TODAY - 29*DAY);
     state.to   = t ? new Date(t+'T00:00:00') : new Date(TODAY);
-    if(state.from > state.to) [state.from, state.to] = [state.to, state.from];
+    if(state.from > state.to){ const x = state.from; state.from = state.to; state.to = x; }
   }
 }
 
-function stats(events){
-  const s = {counts:{}};
-  GROUPS.forEach(g => s.counts[g.id] = 0);
-  for(const e of events){
-    if(s.counts[e.g] !== undefined) s.counts[e.g]++;
+/* Базовый пул: фильтр по открытости вакансий (фильтр рекрутера отдельно) */
+function basePool(){
+  return state.onlyOpen ? EVENTS.filter(e => VOPEN[e.v]) : EVENTS;
+}
+function inRange(e, from, to){ return e.t >= +from && e.t <= +to; }
+
+/* --------- ядро: уникальные кандидаты, как считает ХФ --------- */
+
+/* число уникальных пар кандидат+вакансия на каждом этапе */
+function stageCounts(evts){
+  const sets = STAGES.map(() => new Set());
+  for(const e of evts) sets[e.s].add(e.a + ':' + e.v);
+  return sets.map(s => s.size);
+}
+/* уникальные пары кандидат+вакансия во всём наборе */
+function uniqPairs(evts){
+  const s = new Set();
+  for(const e of evts) s.add(e.a + ':' + e.v);
+  return s.size;
+}
+/* сумма уникальных по этапам определённой группы */
+function groupCount(counts, group){
+  let n = 0;
+  for(let i=0;i<STAGES.length;i++) if(SGROUP[i] === group) n += counts[i];
+  return n;
+}
+const isInterview = i => SGROUP[i] === 'interview';
+
+/* сколько уникальных интервью у рекрутера за окно от now-days до now */
+function interviewsIn(pool, recIdx, days){
+  const from = +TODAY - (days-1)*DAY, to = +TODAY + DAY - 1;
+  const s = new Set();
+  for(const e of pool){
+    if(e.r !== recIdx || !isInterview(e.s)) continue;
+    if(e.t < from || e.t > to) continue;
+    s.add(e.a + ':' + e.v + ':' + e.s);
   }
-  return s;
+  return s.size;
 }
 
 const pct = (a,b) => b > 0 ? Math.round(a/b*100) + '%' : '·';
 const fmt = d => d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
-function deltaText(cur, prev){
+function delta(cur, prev){
   if(prev <= 0) return '';
-  const p = Math.round((cur - prev) / prev * 100);
-  if(p === 0) return 'как в пред. периоде';
-  return (p > 0 ? '+' : '') + p + '% к пред. периоду';
+  const p = Math.round((cur-prev)/prev*100);
+  return p === 0 ? 'как в пред. периоде' : (p>0?'+':'') + p + '% к пред. периоду';
 }
 
-/* ------------------------- график ------------------------- */
+/* ------------------------- воронка ------------------------- */
 
-function smoothPath(pts){
-  if(pts.length < 2) return '';
-  let d = 'M' + pts[0][0] + ',' + pts[0][1];
-  for(let i = 0; i < pts.length - 1; i++){
-    const p0 = pts[i-1] || pts[i], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2] || p2;
-    const c1x = p1[0] + (p2[0]-p0[0])/6, c1y = p1[1] + (p2[1]-p0[1])/6;
-    const c2x = p2[0] - (p3[0]-p1[0])/6, c2y = p2[1] - (p3[1]-p1[1])/6;
-    d += 'C' + [c1x,c1y,c2x,c2y,p2[0],p2[1]].map(n => Math.round(n*10)/10).join(',');
+function funnelHTML(counts, showZero){
+  const max = Math.max(1, ...counts);
+  let html = '', any = false;
+  for(let i=0;i<STAGES.length;i++){
+    if(SGROUP[i] === 'rejected') continue;
+    const n = counts[i];
+    if(!n && !showZero) continue;
+    any = true;
+    const w = n ? Math.max(3, Math.round(n/max*100)) : 0;
+    html += '<div class="stage"><div class="stage-top"><span>'+esc(STAGES[i])+'</span><b>'+n+'</b></div>'
+          + '<div class="bar'+(n?'':' zero')+'" style="width:'+w+'%;background:'
+          + (SHADE[SGROUP[i]] || SHADE.other) + '"></div></div>';
   }
-  return d;
+  return any ? html : '<div class="empty">Нет движения за период</div>';
 }
 
+/* Отказы по последнему этапу перед отказом */
+function rejectsHTML(evts){
+  const last = {}, rejected = new Set();
+  const sorted = evts.slice().sort((a,b) => a.t - b.t);
+  for(const e of sorted){
+    const k = e.a + ':' + e.v;
+    if(SGROUP[e.s] === 'rejected') rejected.add(k);
+    else last[k] = e.s;
+  }
+  const counts = STAGES.map(() => 0);
+  let total = 0;
+  for(const k of rejected){
+    if(last[k] === undefined) continue;
+    counts[last[k]]++; total++;
+  }
+  if(!total) return '<div class="empty">Нет отказов за период</div>';
+  const max = Math.max(...counts);
+  let html = '';
+  for(let i=0;i<STAGES.length;i++){
+    if(!counts[i] || SGROUP[i] === 'rejected') continue;
+    html += '<div class="stage"><div class="stage-top"><span>'+esc(STAGES[i])+'</span><b>'+counts[i]+'</b></div>'
+          + '<div class="bar" style="width:'+Math.max(3,Math.round(counts[i]/max*100))
+          + '%;background:var(--grey)"></div></div>';
+  }
+  return html;
+}
+
+/* ------------------------- графики ------------------------- */
+
+function path(pts){
+  return pts.length ? 'M' + pts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join('L') : '';
+}
 function niceMax(m){
-  const steps = [4,6,8,10,15,20,30,40,60,80,100,150,200,300,400,600,800,1000,1500,2000,3000,5000];
-  for(const s of steps) if(m <= s) return s;
+  const st = [4,6,8,10,15,20,30,40,60,80,100,150,200,300,500,800,1200,2000,3000,5000];
+  for(const s of st) if(m <= s) return s;
   return Math.ceil(m/1000)*1000;
 }
 
-function renderChart(pool){
-  const el = document.getElementById('chart');
-  const days = Math.round((state.to - state.from)/DAY) + 1;
-  const step = days <= 21 ? 1 : days <= 190 ? 7 : 30;
-  const n = Math.ceil(days/step);
-  const buckets = Array.from({length:n}, (_, i) => ({
-    start: new Date(+state.from + i*step*DAY), interview:0, offer:0, hired:0
-  }));
+function sparkline(pool, recIdx){
+  const days = 30, from = +TODAY - (days-1)*DAY;
+  const per = new Array(days).fill(0);
+  const seen = new Set();
   for(const e of pool){
-    const i = Math.floor((e.date - state.from)/(step*DAY));
-    if(i < 0 || i >= n) continue;
-    if(e.g === 'interview') buckets[i].interview++;
-    if(e.g === 'offer') buckets[i].offer++;
-    if(e.g === 'hired') buckets[i].hired++;
+    if(e.r !== recIdx || !isInterview(e.s) || e.t < from) continue;
+    const k = e.a+':'+e.v+':'+e.s;
+    if(seen.has(k)) continue;
+    seen.add(k);
+    const i = Math.round((e.t - from)/DAY);
+    if(i >= 0 && i < days) per[i]++;
   }
-  document.getElementById('chartSub').textContent = 'Интервью, офферы и наймы '
-    + (step === 1 ? 'по дням' : step === 7 ? 'по неделям' : 'по месяцам');
-  const labFmt = d => step === 30
-    ? d.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'})
-    : fmt(d);
+  let acc = 0;
+  const cum = per.map(v => acc += v);
+  const max = Math.max(1, acc);
+  const W = 200, H = 34;
+  const pts = cum.map((v,i) => [i*W/(days-1), H - 2 - (v/max)*(H-5)]);
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'
+    + '<path d="'+path(pts)+'L'+W+','+H+'L0,'+H+'Z" fill="#2742DB" fill-opacity=".08"/>'
+    + '<path d="'+path(pts)+'" fill="none" stroke="#2742DB" stroke-width="1.6" '
+    + 'vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>';
+}
 
-  if(n < 2 || buckets.every(b => !b.interview && !b.offer && !b.hired)){
-    el.innerHTML = '<div class="empty">Недостаточно событий для графика</div>';
+function renderRace(pool){
+  const el = document.getElementById('race');
+  const days = Math.round((state.to - state.from)/DAY) + 1;
+  const step = days <= 31 ? 1 : days <= 190 ? 7 : 30;
+  const n = Math.max(2, Math.ceil(days/step));
+  const active = RECS.map((_,i) => i).filter(i =>
+    pool.some(e => e.r === i && isInterview(e.s) && inRange(e, state.from, state.to)));
+
+  if(!active.length){
+    el.innerHTML = '<div class="empty">Нет интервью за выбранный период</div>';
+    document.getElementById('raceLegend').innerHTML = '';
     return;
   }
 
-  const W = 820, H = 230, padL = 34, padR = 12, padT = 14, padB = 30;
-  const iw = W - padL - padR, ih = H - padT - padB;
-  const ymax = niceMax(Math.max(1, ...buckets.map(b => Math.max(b.interview, b.offer, b.hired))));
-  const X = i => padL + (n === 1 ? iw/2 : i*iw/(n-1));
-  const Y = v => padT + (1 - v/ymax)*ih;
-
-  const pInt = buckets.map((b,i) => [X(i), Y(b.interview)]);
-  const pOff = buckets.map((b,i) => [X(i), Y(b.offer)]);
-  const pHir = buckets.map((b,i) => [X(i), Y(b.hired)]);
-  const base = Y(0);
-  const area = smoothPath(pInt)
-    + 'L' + Math.round(pInt[pInt.length-1][0]) + ',' + base
-    + 'L' + Math.round(pInt[0][0]) + ',' + base + 'Z';
-
-  const labStep = Math.ceil(n/8);
-  let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Динамика интервью и наймов">';
-  svg += '<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">'
-       + '<stop offset="0" stop-color="#2742DB" stop-opacity=".16"/>'
-       + '<stop offset="1" stop-color="#2742DB" stop-opacity="0"/></linearGradient></defs>';
-  for(const v of [0, ymax/2, ymax]){
-    svg += '<line x1="'+padL+'" y1="'+Y(v)+'" x2="'+(W-padR)+'" y2="'+Y(v)+'" stroke="#E2E6F0" stroke-width="1"/>'
-         + '<text x="'+(padL-7)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="10.5" fill="#5B6478">'+v+'</text>';
+  const series = {};
+  for(const i of active) series[i] = new Array(n).fill(0);
+  const seen = new Set();
+  for(const e of pool){
+    if(!isInterview(e.s) || !inRange(e, state.from, state.to)) continue;
+    const k = e.a+':'+e.v+':'+e.s;
+    if(seen.has(k)) continue;
+    seen.add(k);
+    const b = Math.min(n-1, Math.floor((e.t - +state.from)/(step*DAY)));
+    if(series[e.r]) series[e.r][b]++;
   }
-  svg += '<path d="'+area+'" fill="url(#ga)"/>';
-  svg += '<path d="'+smoothPath(pInt)+'" fill="none" stroke="#2742DB" stroke-width="2.2" stroke-linecap="round"/>';
-  svg += '<path d="'+smoothPath(pOff)+'" fill="none" stroke="#8FA0F0" stroke-width="1.8" stroke-linecap="round"/>';
-  svg += '<path d="'+smoothPath(pHir)+'" fill="none" stroke="#10162B" stroke-width="1.8" stroke-linecap="round"/>';
-  buckets.forEach((b,i) => {
-    const lab = labFmt(b.start);
-    svg += '<circle cx="'+X(i)+'" cy="'+Y(b.interview)+'" r="3" fill="#2742DB"><title>'+lab+': интервью '+b.interview+'</title></circle>';
-    svg += '<circle cx="'+X(i)+'" cy="'+Y(b.offer)+'" r="2.6" fill="#8FA0F0"><title>'+lab+': офферы '+b.offer+'</title></circle>';
-    svg += '<circle cx="'+X(i)+'" cy="'+Y(b.hired)+'" r="2.6" fill="#10162B"><title>'+lab+': наймы '+b.hired+'</title></circle>';
-    if(i % labStep === 0){
-      svg += '<text x="'+X(i)+'" y="'+(H-9)+'" text-anchor="middle" font-size="10.5" fill="#5B6478">'+lab+'</text>';
-    }
+  const cum = {};
+  for(const i of active){
+    let acc = 0; cum[i] = series[i].map(v => acc += v);
+  }
+  const ymax = niceMax(Math.max(1, ...active.map(i => cum[i][n-1])));
+
+  const W = 860, H = 250, pL = 38, pR = 60, pT = 12, pB = 28;
+  const iw = W-pL-pR, ih = H-pT-pB;
+  const X = i => pL + i*iw/(n-1), Y = v => pT + (1 - v/ymax)*ih;
+
+  let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" role="img" '
+    + 'aria-label="Накопительные интервью по рекрутерам">';
+  for(const v of [0, ymax/2, ymax]){
+    svg += '<line x1="'+pL+'" y1="'+Y(v)+'" x2="'+(W-pR)+'" y2="'+Y(v)+'" stroke="#E2E6F0"/>'
+         + '<text x="'+(pL-7)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="10.5" fill="#5B6478">'
+         + Math.round(v)+'</text>';
+  }
+  const labStep = Math.ceil(n/8);
+  for(let i=0;i<n;i+=labStep){
+    const d = new Date(+state.from + i*step*DAY);
+    const lab = step === 30 ? d.toLocaleDateString('ru-RU',{month:'short',year:'2-digit'}) : fmt(d);
+    svg += '<text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10.5" fill="#5B6478">'+lab+'</text>';
+  }
+  active.forEach((r,k) => {
+    const col = LINE_COLORS[k % LINE_COLORS.length];
+    const pts = cum[r].map((v,i) => [X(i), Y(v)]);
+    svg += '<path d="'+path(pts)+'" fill="none" stroke="'+col+'" stroke-width="2" '
+         + 'stroke-linejoin="round" stroke-linecap="round"/>'
+         + '<circle cx="'+X(n-1)+'" cy="'+Y(cum[r][n-1])+'" r="3" fill="'+col+'"/>'
+         + '<text x="'+(X(n-1)+8)+'" y="'+(Y(cum[r][n-1])+4)+'" font-size="11" font-weight="600" '
+         + 'fill="'+col+'">'+cum[r][n-1]+'</text>';
   });
   svg += '</svg>';
   el.innerHTML = svg;
+
+  document.getElementById('raceSub').textContent = 'Нарастающим итогом, '
+    + (step === 1 ? 'по дням' : step === 7 ? 'по неделям' : 'по месяцам');
+  document.getElementById('raceLegend').innerHTML = active.map((r,k) =>
+    '<span><i style="background:'+LINE_COLORS[k % LINE_COLORS.length]+'"></i>'+esc(RECS[r])+'</span>'
+  ).join('');
 }
 
 /* ------------------------- рендер ------------------------- */
 
-const SHADE = {added:'var(--f1)', screening:'var(--f2)', interview:'var(--f3)',
-               offer:'var(--f4)', hired:'var(--f5)', other:'#E9EDF8', rejected:'#DFE3EE'};
-const SHADE_TEXT = {offer:'#fff', hired:'#fff'};
-
-function stagesHTML(evts){
-  const counts = {};
-  for(const e of evts) if(e.st) counts[e.st] = (counts[e.st] || 0) + 1;
-  const names = (META.stages || []).filter(st => counts[st]);
-  if(!names.length) return '<div class="empty">Нет движения за период</div>';
-  const max = Math.max(...names.map(st => counts[st]));
-  return names.map(st => {
-    const g = (META.stageGroups || {})[st] || 'other';
-    const w = Math.max(6, Math.round(counts[st]/max*100));
-    return '<div class="stage">'
-      + '<div class="stage-top"><span>'+st+'</span><b>'+counts[st]+'</b></div>'
-      + '<div class="bar" style="width:'+w+'%;background:'+(SHADE[g] || SHADE.other)+'"></div>'
-      + '</div>';
-  }).join('');
-}
-
-function funnelHTML(counts, compact){
-  const maxC = Math.max(1, ...GROUPS.map(g => counts[g.id]));
-  let html = '';
-  GROUPS.forEach((g, i) => {
-    const n = counts[g.id];
-    const w = Math.max(compact ? 6 : 5, Math.round(n/maxC*100));
-    html += '<div class="stage">'
-          + '<div class="stage-top"><span>'+g.label+'</span><b>'+n+'</b></div>'
-          + '<div class="bar" style="width:'+w+'%;background:'+g.shade+'"></div>'
-          + '</div>';
-    if(i < GROUPS.length-1){
-      const next = counts[GROUPS[i+1].id];
-      html += '<div class="conv">конверсия <b>'+pct(next,n)+'</b></div>';
-    }
-  });
-  return html;
-}
-
 function render(){
   applyPreset();
+  const base = basePool();
+  const period = base.filter(e => inRange(e, state.from, state.to));
+  const pool = state.rec === null ? period : period.filter(e => e.r === state.rec);
 
-  const period = EVENTS.filter(e => e.date >= state.from && e.date <= state.to);
-  const pool = period.filter(e => state.rec === 'all' || e.rec === state.rec);
-  const total = stats(pool);
-
-  /* прошлый период той же длины, для дельт */
-  const len = state.to - state.from + DAY;
+  const len = +state.to - +state.from + DAY;
   const pFrom = new Date(+state.from - len), pTo = new Date(+state.from - DAY);
-  const prevPool = EVENTS.filter(e => e.date >= pFrom && e.date <= pTo
-    && (state.rec === 'all' || e.rec === state.rec));
-  const prev = stats(prevPool);
+  const prevAll = base.filter(e => inRange(e, pFrom, pTo));
+  const prev = state.rec === null ? prevAll : prevAll.filter(e => e.r === state.rec);
 
-  const recLabel = state.rec === 'all' ? 'все рекрутеры' : state.rec;
-  const badge = META.demo
-    ? '<span class="badge demo">демо-данные</span>'
-    : '<span class="badge live">обновлено ' +
-      META.generated.toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) +
-      '</span>';
-  document.getElementById('rangeNote').innerHTML =
-    fmt(state.from) + ' по ' + fmt(state.to) + ' · ' + recLabel + badge;
+  const counts = stageCounts(pool), pcounts = stageCounts(prev);
 
-  /* KPI + дельты */
-  const prevInt = prev.counts.interview;
-  document.getElementById('kAdded').textContent = total.counts.added;
-  document.getElementById('kInt').textContent   = total.counts.interview;
-  document.getElementById('kOffer').textContent = total.counts.offer;
-  document.getElementById('kHired').textContent = total.counts.hired;
-  document.getElementById('kConv').textContent  = pct(total.counts.hired, total.counts.added);
-  document.getElementById('dAdded').textContent = deltaText(total.counts.added, prev.counts.added);
-  document.getElementById('dInt').textContent   = deltaText(total.counts.interview, prevInt);
-  document.getElementById('dOffer').textContent = deltaText(total.counts.offer, prev.counts.offer);
-  document.getElementById('dHired').textContent = deltaText(total.counts.hired, prev.counts.hired);
-  const cConv = total.counts.added > 0 ? total.counts.hired/total.counts.added*100 : null;
-  const pConv = prev.counts.added > 0 ? prev.counts.hired/prev.counts.added*100 : null;
-  document.getElementById('dConv').textContent =
-    (cConv !== null && pConv !== null)
-      ? (Math.round(cConv-pConv) === 0 ? 'как в пред. периоде'
-        : (cConv > pConv ? '+' : '') + Math.round(cConv-pConv) + ' п.п. к пред. периоду')
-      : '';
+  /* шапка */
+  const badge = META.demo ? '<span class="badge demo">демо-данные</span>'
+    : '<span class="badge live">обновлено ' + META.generated.toLocaleString('ru-RU',
+        {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) + '</span>';
+  document.getElementById('rangeNote').innerHTML = fmt(state.from) + ' по ' + fmt(state.to)
+    + ' · ' + (state.rec === null ? 'все рекрутеры' : esc(RECS[state.rec]))
+    + ' · ' + (state.onlyOpen ? 'открытые вакансии' : 'все вакансии') + badge;
 
-  /* график */
-  renderChart(pool);
+  /* KPI */
+  const all = uniqPairs(pool), pAll = uniqPairs(prev);
+  const set = (id, v) => document.getElementById(id).textContent = v;
+  set('kAll', all);            set('dAll', delta(all, pAll));
+  set('kInt', groupCount(counts,'interview'));
+  set('dInt', delta(groupCount(counts,'interview'), groupCount(pcounts,'interview')));
+  set('kOffer', groupCount(counts,'offer'));
+  set('dOffer', delta(groupCount(counts,'offer'), groupCount(pcounts,'offer')));
+  set('kHired', groupCount(counts,'hired'));
+  set('dHired', delta(groupCount(counts,'hired'), groupCount(pcounts,'hired')));
+  set('kRej', groupCount(counts,'rejected'));
+  set('dRej', delta(groupCount(counts,'rejected'), groupCount(pcounts,'rejected')));
 
-  /* выбор рекрутера */
-  document.getElementById('recChips').innerHTML = ['all', ...RECRUITERS].map(r =>
-    '<button class="chip-btn'+(state.rec===r?' active':'')+'" data-rec="'+esc(r)+'">'
-    + (r === 'all' ? 'Все' : r) + '</button>'
-  ).join('');
-  document.querySelectorAll('.chip-btn').forEach(el => {
-    el.addEventListener('click', () => { state.rec = el.dataset.rec; render(); });
-  });
+  /* карточки рекрутеров */
+  const order = RECS.map((_,i) => i)
+    .sort((a,b) => interviewsIn(base,b,30) - interviewsIn(base,a,30));
+  document.getElementById('rcards').innerHTML = order.map(i => {
+    const d = interviewsIn(base,i,1), w = interviewsIn(base,i,7), m = interviewsIn(base,i,30);
+    const mine = period.filter(e => e.r === i);
+    const c = stageCounts(mine);
+    return '<button class="rcard'+(state.rec===i?' active':'')+'" data-rec="'+i+'">'
+      + '<div class="name"><span>'+esc(RECS[i])+'</span><small>интервью</small></div>'
+      + '<div class="three">'
+      + '<div><div class="num n">'+d+'</div><div class="c">сегодня</div></div>'
+      + '<div><div class="num n big">'+w+'</div><div class="c">7 дней</div></div>'
+      + '<div><div class="num n">'+m+'</div><div class="c">30 дней</div></div>'
+      + '</div><div class="spark">'+sparkline(base,i)+'</div>'
+      + '<div class="rfoot">за период: кандидаты <b>'+uniqPairs(mine)+'</b>'
+      + ' · офферы <b>'+groupCount(c,'offer')+'</b>'
+      + ' · наймы <b>'+groupCount(c,'hired')+'</b></div></button>';
+  }).join('') || '<div class="empty">Нет рекрутеров в данных</div>';
 
-  /* воронка */
-  const fEl = document.getElementById('funnel');
-  fEl.innerHTML = GROUPS.every(g => total.counts[g.id] === 0)
-    ? '<div class="empty">Нет движения по этапам за выбранный период</div>'
-    : funnelHTML(total.counts, false);
-
-  /* рекрутеры */
-  const recData = RECRUITERS.map(r => {
-    const s = stats(period.filter(e => e.rec === r));
-    return {name:r, ...s};
-  }).sort((a,b) => b.counts.interview - a.counts.interview);
-
-  const maxInt = Math.max(1, ...recData.map(r => r.counts.interview));
-  document.getElementById('recruiters').innerHTML = recData.map(r =>
-    '<button class="rec-row'+(state.rec===r.name?' active':'')+'" data-rec="'+esc(r.name)+'">'
-    + '<div class="rec-head"><span class="rec-name">'+r.name+'</span>'
-    + '<span class="rec-int">'+r.counts.interview+'<small>интервью</small></span></div>'
-    + '<div class="rec-bar"><i style="width:'+Math.round(r.counts.interview/maxInt*100)+'%"></i></div>'
-    + '<div class="rec-meta">новые <b>'+r.counts.added+'</b> · офферы <b>'+r.counts.offer+'</b>'
-    + ' · наймы <b>'+r.counts.hired+'</b> · конв. <b>'+pct(r.counts.hired,r.counts.added)+'</b></div>'
-    + '</button>'
-  ).join('') || '<div class="empty">Пока нет данных</div>';
-
-  document.querySelectorAll('.rec-row').forEach(el => {
+  document.querySelectorAll('.rcard').forEach(el => {
     el.addEventListener('click', () => {
-      state.rec = state.rec === el.dataset.rec ? 'all' : el.dataset.rec;
+      const i = +el.dataset.rec;
+      state.rec = state.rec === i ? null : i;
       render();
     });
   });
 
-  /* вакансии: аккордеон */
-  const vacMap = {};
-  for(const e of pool){
-    if(!vacMap[e.vac]) vacMap[e.vac] = {events:[], recs:{}};
-    vacMap[e.vac].events.push(e);
-    vacMap[e.vac].recs[e.rec] = (vacMap[e.vac].recs[e.rec] || 0) + 1;
-  }
-  const vacData = Object.entries(vacMap).map(([name, v]) => {
-    const s = stats(v.events);
-    const rec = Object.entries(v.recs).sort((a,b) => b[1]-a[1])[0][0];
-    const conv = s.counts.added > 0 ? s.counts.hired/s.counts.added : -1;
-    return {name, rec, s, conv, events:v.events};
-  }).sort((a,b) => b.conv - a.conv || b.s.counts.hired - a.s.counts.hired
-                 || b.s.counts.added - a.s.counts.added);
+  renderRace(state.rec === null ? base : base.filter(e => e.r === state.rec));
+  document.getElementById('funnel').innerHTML = funnelHTML(counts, true);
+  document.getElementById('rejects').innerHTML = rejectsHTML(pool);
 
-  const chev = '<svg class="vac-chev" viewBox="0 0 18 18" fill="none">'
-    + '<path d="M6.5 4l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  /* вакансии */
+  const byVac = {};
+  for(const e of pool){ (byVac[e.v] = byVac[e.v] || []).push(e); }
+  const vd = Object.entries(byVac).map(([v, evts]) => {
+    const c = stageCounts(evts);
+    const added = c[0] || 0, hired = groupCount(c,'hired');
+    return {v:+v, c, evts, added, hired, conv: added > 0 ? hired/added : -1};
+  }).sort((a,b) => b.conv - a.conv || b.hired - a.hired || b.added - a.added);
 
-  document.getElementById('vacList').innerHTML = vacData.map(({name, rec, s, conv, events}) => {
+  const chev = '<svg class="chev" viewBox="0 0 16 16" fill="none"><path d="M6 3.5l5 4.5-5 4.5" '
+    + 'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  document.getElementById('vacList').innerHTML = vd.map(({v,c,evts,added,hired,conv}) => {
     const cp = conv >= 0 ? Math.round(conv*100) : null;
-    const body = META.stages ? stagesHTML(events) : funnelHTML(s.counts, true);
-    return '<details class="vac" data-vac="'+esc(name)+'"'
-      + (state.openVacs.has(name) ? ' open' : '') + '>'
-      + '<summary>' + chev
-      + '<span class="vac-title"><span class="vac-name">'+name+'</span>'
-      + ' <span class="vac-rec">· '+rec+'</span></span>'
-      + '<span class="vac-stats">'
-      + '<span class="hide-m">новые <b>'+s.counts.added+'</b></span>'
-      + '<span class="int">интервью <b>'+s.counts.interview+'</b></span>'
-      + '<span>наймы <b>'+s.counts.hired+'</b></span>'
-      + '<span class="vac-conv"><span class="mini"><i style="width:'
-      + (cp === null ? 0 : Math.min(100, cp)) + '%"></i></span><b>'
-      + (cp === null ? '·' : cp+'%') + '</b></span>'
-      + '</span></summary>'
-      + '<div class="vac-body">' + body + '</div>'
-      + '</details>';
+    const rec = RECS[(evts[0]||{}).r] || '';
+    return '<details class="vac" data-v="'+v+'"'+(state.open.has(v)?' open':'')+'>'
+      + '<summary>'+chev+'<span class="vtitle"><span class="vname">'+esc(VACS[v])+'</span>'
+      + (VOPEN[v] ? '' : ' <span class="vrec">· закрыта</span>')
+      + '<span class="vrec"> · '+esc(rec)+'</span></span>'
+      + '<span class="vstats">'
+      + '<span class="hide-m">новые <b>'+added+'</b></span>'
+      + '<span class="int">интервью <b>'+groupCount(c,'interview')+'</b></span>'
+      + '<span>наймы <b>'+hired+'</b></span>'
+      + '<span class="mini"><i style="width:'+(cp===null?0:Math.min(100,cp))+'%"></i></span>'
+      + '<b>'+(cp===null?'·':cp+'%')+'</b></span></summary>'
+      + '<div class="vbody">'+funnelHTML(c, false)+'</div></details>';
   }).join('') || '<div class="empty">Нет движения по вакансиям за период</div>';
 
   document.querySelectorAll('details.vac').forEach(d => {
     d.addEventListener('toggle', () => {
-      if(d.open) state.openVacs.add(d.dataset.vac);
-      else state.openVacs.delete(d.dataset.vac);
+      const v = +d.dataset.v;
+      if(d.open) state.open.add(v); else state.open.delete(v);
     });
   });
 
-  /* футер */
   let foot = META.demo
-    ? 'Демо-данные: data.json еще не собран. Запусти workflow во вкладке Actions.'
-    : 'Данные из Huntflow, обновляются раз в час.';
+    ? 'Демо-данные: data.json ещё не собран. Запусти workflow во вкладке Actions.'
+    : 'Данные из Huntflow, обновляются раз в час. На этапе считаются уникальные кандидаты, как в Центре аналитики.';
   if(META.unmapped.length){
-    foot += ' <span class="warn">Этапы без группы: ' + META.unmapped.join(', ')
-          + '. Добавь их в GROUP_OVERRIDES в fetch_huntflow.py.</span>';
+    foot += ' <span class="warn">Этапы без группы: '+META.unmapped.join(', ')+'</span>';
   }
   document.getElementById('foot').innerHTML = foot;
 }
@@ -684,23 +662,23 @@ function render(){
 
 document.querySelectorAll('.seg button').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.seg button').forEach(b => b.classList.remove('active'));
+    btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    state.preset = btn.dataset.preset;
-    document.getElementById('dates').classList.toggle('show', state.preset === 'custom');
+    if(btn.dataset.open !== undefined){ state.onlyOpen = btn.dataset.open === '1'; }
+    else {
+      state.preset = btn.dataset.preset;
+      document.getElementById('dates').classList.toggle('show', state.preset === 'custom');
+    }
     render();
   });
 });
-
-['dFrom','dTo'].forEach(id =>
-  document.getElementById(id).addEventListener('change', render)
-);
+['dFrom','dTo'].forEach(id => document.getElementById(id).addEventListener('change', render));
 
 const iso = d => d.toISOString().slice(0,10);
 document.getElementById('dFrom').value = iso(new Date(+TODAY - 29*DAY));
 document.getElementById('dTo').value   = iso(TODAY);
 
-loadData();
+load();
 </script>
 </body>
 </html>
