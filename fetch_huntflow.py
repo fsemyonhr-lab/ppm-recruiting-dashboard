@@ -38,7 +38,82 @@ API_CANDIDATES = [
     "https://api.huntflow.ai/v2",
 ]
 API = ""  # выбирается автоматически в choose_base()
-TOKEN = (os.environ.get("HUNTFLOW_TOKEN") or "").strip()
+
+# Токены. Access живёт 7 дней, refresh 14, поэтому скрипт умеет
+# продлевать доступ сам: поймал 401, сходил в /token/refresh, получил
+# новую пару и сохранил её в token.enc (файл зашифрован ключом
+# HUNTFLOW_KEY, поэтому его безопасно держать в публичном репозитории).
+TOKEN_FILE = Path("token.enc")
+ACCESS = ""
+REFRESH = ""
+REFRESHED = False
+
+
+def _fernet():
+    key = (os.environ.get("HUNTFLOW_KEY") or "").strip()
+    if not key:
+        return None
+    try:
+        from cryptography.fernet import Fernet
+        return Fernet(key.encode())
+    except Exception as exc:
+        print(f"HUNTFLOW_KEY не подошёл ({exc}), автопродление токена отключено")
+        return None
+
+
+def load_tokens() -> tuple[str, str]:
+    """Токены из зашифрованного файла, иначе из секретов репозитория."""
+    f = _fernet()
+    if f and TOKEN_FILE.exists():
+        try:
+            d = json.loads(f.decrypt(TOKEN_FILE.read_bytes()))
+            print("Токены взяты из token.enc")
+            return d.get("access", ""), d.get("refresh", "")
+        except Exception as exc:
+            print(f"token.enc не читается ({exc}), беру токены из секретов")
+    return ((os.environ.get("HUNTFLOW_TOKEN") or "").strip(),
+            (os.environ.get("HUNTFLOW_REFRESH") or "").strip())
+
+
+def save_tokens(access: str, refresh: str) -> None:
+    f = _fernet()
+    if not f:
+        print("Новую пару токенов сохранить некуда: не задан секрет HUNTFLOW_KEY. "
+              "Через неделю доступ снова протухнет.")
+        return
+    TOKEN_FILE.write_bytes(f.encrypt(
+        json.dumps({"access": access, "refresh": refresh}).encode()))
+    print("Новая пара токенов сохранена в token.enc")
+
+
+def do_refresh() -> bool:
+    """Продлевает доступ по refresh_token. За прогон пробуем один раз."""
+    global ACCESS, REFRESH, REFRESHED
+    if REFRESHED or not REFRESH:
+        return False
+    REFRESHED = True
+    bases = [API] if API else [b.rstrip("/") for b in API_CANDIDATES if b]
+    for base in bases:
+        try:
+            r = requests.post(base + "/token/refresh",
+                              json={"refresh_token": REFRESH},
+                              headers={"User-Agent": UA}, timeout=30)
+        except requests.RequestException as exc:
+            print(f"  продление через {base}: сетевая ошибка {exc}")
+            continue
+        if r.status_code == 200:
+            d = r.json()
+            ACCESS = d.get("access_token") or ACCESS
+            REFRESH = d.get("refresh_token") or REFRESH
+            SESSION.headers["Authorization"] = f"Bearer {ACCESS}"
+            save_tokens(ACCESS, REFRESH)
+            print("Доступ продлён автоматически")
+            return True
+        print(f"  продление через {base}: {r.status_code} {r.text[:200]}")
+    return False
+
+
+UA = "PPM-Recruiting-Dashboard/1.0 (github actions)"
 CACHE_FILE = Path("cache.json")   # кэш логов, чтобы не перекачивать всё каждый час
 OUT_FILE = Path("docs/data.json")
 PAGE_SIZE = 30                    # у эндпоинта кандидатов лимит 30 на страницу
@@ -125,8 +200,12 @@ def api_get(path: str, params: dict | None = None, allow_missing: bool = False) 
     for attempt in range(1, 6):
         r = SESSION.get(API + path, params=params, timeout=30)
         if r.status_code == 401:
-            sys.exit("Huntflow ответил 401: токен неверный или истек. "
-                     "Проверь секрет HUNTFLOW_TOKEN в настройках репозитория.")
+            if do_refresh():
+                continue
+            sys.exit("Huntflow ответил 401: доступ истёк, а продлить не вышло.\n"
+                     f"Ответ: {r.text[:200]}\n"
+                     "Выпусти новую пару токенов в ХФ и обнови секреты "
+                     "HUNTFLOW_TOKEN и HUNTFLOW_REFRESH.")
         if r.status_code == 404:
             if allow_missing:
                 return {}
@@ -163,10 +242,11 @@ def paged(path: str, params: dict | None = None, allow_missing: bool = False):
         page += 1
 
 
-def choose_base() -> None:
+def choose_base(retry: bool = True) -> None:
     """Перебирает возможные адреса API и выбирает первый рабочий."""
     global API
     report = []
+    saw_expired = False
     for base in [b.rstrip("/") for b in API_CANDIDATES if b]:
         try:
             r = SESSION.get(base + "/accounts", timeout=30)
@@ -187,26 +267,38 @@ def choose_base() -> None:
             API = base
             print(f"Рабочий адрес API: {base}")
             return
+        if r.status_code == 401:
+            saw_expired = True
+            if not API:
+                API = base  # адрес живой, просто доступ истёк
         report.append((base, f"{r.status_code}: {r.text[:200]}"))
+
+    # доступ истёк: пробуем продлить и зайти ещё раз
+    if saw_expired and retry and do_refresh():
+        API = ""
+        return choose_base(retry=False)
+
     print("Ни один адрес API не подошел. Что ответили серверы:")
     for base, msg in report:
         print(f"  {base} -> {msg}")
     print("Подсказка: 401 значит адрес живой, но токен не подошел.")
-    sys.exit("Спроси у Службы заботы ХФ базовый URL API для вашего аккаунта "
-             "и добавь его переменной HUNTFLOW_API в update.yml, "
-             "либо скинь этот лог в чат.")
+    sys.exit("Выпусти новую пару токенов в ХФ (раздел Токены) и обнови секреты "
+             "HUNTFLOW_TOKEN и HUNTFLOW_REFRESH, либо скинь этот лог в чат.")
 
 
 # ----------------------------- сбор ----------------------------------
 
 def main() -> None:
-    if not TOKEN:
+    global ACCESS, REFRESH
+    ACCESS, REFRESH = load_tokens()
+    if not ACCESS:
         sys.exit("Не задан HUNTFLOW_TOKEN. Добавь секрет в репозиторий "
                  "(Settings, Secrets and variables, Actions).")
 
-    SESSION.headers["Authorization"] = f"Bearer {TOKEN}"
-    SESSION.headers["User-Agent"] = "PPM-Recruiting-Dashboard/1.0 (github actions)"
-    print(f"Токен на месте, длина {len(TOKEN)} символов")
+    SESSION.headers["Authorization"] = f"Bearer {ACCESS}"
+    SESSION.headers["User-Agent"] = UA
+    print(f"Access-токен на месте ({len(ACCESS)} символов), "
+          f"refresh {'на месте' if REFRESH else 'НЕ задан, автопродления не будет'}")
 
     choose_base()
 
